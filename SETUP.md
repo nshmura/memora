@@ -9,7 +9,7 @@
 3. **「Signing & Capabilities」タブ**
 4. **Bundle Identifier**を変更：
    - 現在：`com.nshmura.memora`
-   - 推奨：`com.yourname.memora` または `com.example.memora`
+   - 推奨：`com.yourname.memora`
 
 ## 2. Development Team設定
 
