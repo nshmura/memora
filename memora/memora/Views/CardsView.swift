@@ -25,7 +25,6 @@ struct CardsView: View {
                     CardListView(
                         cards: viewModel.filteredCards,
                         onEdit: { card in
-                            print("✏️ Edit button tapped for card: \(card.id)")
                             editingCard = card
                         },
                         onDelete: deleteCards
@@ -54,7 +53,6 @@ struct CardsView: View {
             get: { editingCard != nil },
             set: { newValue in
                 if !newValue {
-                    print("🔄 EditCard sheet dismissed, clearing editingCard")
                     editingCard = nil
                 }
             }
@@ -62,16 +60,8 @@ struct CardsView: View {
             if let card = editingCard {
                 NavigationStack {
                     EditCardView(card: card, viewModel: viewModel)
-                        .id(card.id) // カード毎に一意のViewインスタンスを作成
+                        .id(card.id)
                 }
-                .onAppear {
-                    print("📱 EditCard sheet appeared with card: \(card.id)")
-                }
-            } else {
-                Text("エラー: カードが見つかりません")
-                    .onAppear {
-                        print("❌ EditCard sheet appeared but editingCard is nil")
-                    }
             }
         }
         .onAppear {

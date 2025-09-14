@@ -21,11 +21,6 @@ struct EditCardView: View {
     @State private var showingDeleteConfirmation = false
     
     init(card: Card, viewModel: CardsViewModel) {
-        print("🔍 EditCardView.init - card.id: \(card.id)")
-        print("🔍 EditCardView.init - question: \(card.question)")
-        print("🔍 EditCardView.init - answer: \(card.answer)")
-        print("🔍 EditCardView.init - tags: \(card.tags)")
-        
         self.card = card
         self.viewModel = viewModel
         self._question = State(initialValue: card.question)
@@ -34,38 +29,21 @@ struct EditCardView: View {
     }
     
     var body: some View {
-        // デバッグ用のZStack
-        ZStack {
-            Color.clear
-                .onAppear {
-                    print("🎯 EditCardView.body.onAppear - card.id: \(card.id)")
-                    print("🎯 EditCardView.body.onAppear - @State question: \(question)")
-                    print("🎯 EditCardView.body.onAppear - @State answer: \(answer)")
-                }
+        Form {
+            CardInfoView(card: card)
             
-            Form {
-                CardInfoView(card: card)
-                
-                QuestionInputView(question: $question)
-                
-                AnswerInputView(answer: $answer)
-                
-                TagInputView(
-                    tagInput: $tagInput,
-                    selectedTags: $selectedTags,
-                    availableTags: viewModel.availableTags,
-                    onAddTag: {
-                        addTag()
-                    }
-                )
-            }
-        }
-        .background(Color(.systemBackground))
-        .onAppear {
-            print("🚀 EditCardView appeared - card: \(card.id)")
-        }
-        .onDisappear {
-            print("👋 EditCardView disappeared - card: \(card.id)")
+            QuestionInputView(question: $question)
+            
+            AnswerInputView(answer: $answer)
+            
+            TagInputView(
+                tagInput: $tagInput,
+                selectedTags: $selectedTags,
+                availableTags: viewModel.availableTags,
+                onAddTag: {
+                    addTag()
+                }
+            )
         }
         .navigationTitle("カードを編集")
         .navigationBarTitleDisplayMode(.inline)
