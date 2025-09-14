@@ -101,8 +101,8 @@
     - 設定変更の即座反映
     - _Requirements: 2.4_
 
-- [ ] 9. 通知システムの実装
-  - [ ] 9.1 NotificationPlannerクラスの基本実装
+- [x] 9. 通知システムの実装
+  - [x] 9.1 NotificationPlannerクラスの基本実装
     - UNUserNotificationCenter権限要求機能
     - 基本的な通知予約・削除機能
     - _Requirements: 3.1, 3.2_
@@ -115,7 +115,7 @@
 
 - [ ] 10. アプリ統合とナビゲーション
   - [ ] 10.1 メインアプリ構造の実装
-    - SpacedStudyApp.swiftでアプリエントリーポイント作成
+    - MemoraApp.swiftでアプリエントリーポイント作成
     - TabViewでの4画面ナビゲーション実装
     - Store依存性注入の設定
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
