@@ -22,7 +22,7 @@
     - ReviewLogのUnit Testを作成
     - _Requirements: 4.2_
 
-- [ ] 3. JSONストレージシステムの実装
+- [x] 3. JSONストレージシステムの実装
   - [x] 3.1 基本Storeクラスの作成
     - ObservableObjectとしてStoreクラス実装
     - DocumentsディレクトリへのJSONファイル読み書き機能
