@@ -34,10 +34,10 @@ GitHub Copilotのカスタムプロンプトを使用した効率的な開発：
 .github/
 ├── copilot-instructions.md     # 開発ガイドライン
 └── copilot-prompts/
-    ├── setup-project.md        # プロジェクト初期設定
-    ├── implement-task.md       # タスク実装
-    ├── review-task.md          # 実装レビュー
-    └── debug-task.md           # デバッグ支援
+    ├── setup-project.prompt.md        # プロジェクト初期設定
+    ├── implement-task.prompt.md       # タスク実装
+    ├── review-task.prompt.md          # 実装レビュー
+    └── debug-task.prompt.md           # デバッグ支援
 ```
 
 ## 🚀 開発の流れ
