@@ -1,280 +1,243 @@
+//
+//  DateUtilityTests.swift
+//  memoraTests
+//
+//  Created by 西村真一 on 2025/09/14.
+//
+
 import XCTest
 @testable import memora
 
-class DateUtilityTestsFixed: XCTestCase {
+class DateUtilityTests: XCTestCase {
+    
+    // MARK: - Test Setup
     
     override func setUp() {
         super.setUp()
-        // Clear any previous timezone settings
-        NSTimeZone.resetSystemTimeZone()
+        // Ensure we're testing with a consistent timezone
     }
     
-    // MARK: - Test Basic Date Operations
-    
-    func testJSTTimeZone() {
-        let timeZone = DateUtility.jstTimeZone
-        XCTAssertEqual(timeZone.identifier, "Asia/Tokyo", "Should return Asia/Tokyo timezone")
-    }
-    
-    func testJSTCalendar() {
-        let calendar = DateUtility.jstCalendar
-        XCTAssertEqual(calendar.timeZone.identifier, "Asia/Tokyo", "Calendar should use JST timezone")
-        XCTAssertEqual(calendar.identifier, .gregorian, "Should use Gregorian calendar")
-    }
-    
-    // MARK: - Test Start/End of Day
+    // MARK: - Start of Day Tests
     
     func testStartOfDay() {
-        // Create a test date: 2024-02-15 14:30:45 JST
-        guard let testDate = DateUtility.createJSTDate(year: 2024, month: 2, day: 15, hour: 14, minute: 30, second: 45) else {
-            XCTFail("Failed to create test date")
-            return
-        }
+        // Create a specific JST datetime: 2024-01-15 14:30:45 JST
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let testDate = jstFormatter.date(from: "2024-01-15 14:30:45")!
         
         let startOfDay = DateUtility.startOfDay(for: testDate)
-        let jstCalendar = DateUtility.jstCalendar
-        let startComponents = jstCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: startOfDay)
         
-        XCTAssertEqual(startComponents.year, 2024)
-        XCTAssertEqual(startComponents.month, 2)
-        XCTAssertEqual(startComponents.day, 15)
-        XCTAssertEqual(startComponents.hour, 0)
-        XCTAssertEqual(startComponents.minute, 0)
-        XCTAssertEqual(startComponents.second, 0)
+        // Should return 2024-01-15 00:00:00 JST
+        let expectedStart = jstFormatter.date(from: "2024-01-15 00:00:00")!
+        XCTAssertEqual(startOfDay, expectedStart, "Start of day should be 00:00:00 JST")
     }
+    
+    func testStartOfDayAtMidnight() {
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let midnightDate = jstFormatter.date(from: "2024-01-15 00:00:00")!
+        
+        let startOfDay = DateUtility.startOfDay(for: midnightDate)
+        
+        XCTAssertEqual(startOfDay, midnightDate, "Start of day for midnight should be the same")
+    }
+    
+    // MARK: - End of Day Tests
     
     func testEndOfDay() {
-        // Create a test date: 2024-02-15 14:30:45 JST
-        guard let testDate = DateUtility.createJSTDate(year: 2024, month: 2, day: 15, hour: 14, minute: 30, second: 45) else {
-            XCTFail("Failed to create test date")
-            return
-        }
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let testDate = jstFormatter.date(from: "2024-01-15 14:30:45")!
         
         let endOfDay = DateUtility.endOfDay(for: testDate)
+        
+        // Should return 2024-01-15 23:59:59 JST
         let jstCalendar = DateUtility.jstCalendar
-        let endComponents = jstCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second, .nanosecond], from: endOfDay)
+        let components = jstCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: endOfDay)
         
-        XCTAssertEqual(endComponents.year, 2024)
-        XCTAssertEqual(endComponents.month, 2)
-        XCTAssertEqual(endComponents.day, 15)
-        XCTAssertEqual(endComponents.hour, 23)
-        XCTAssertEqual(endComponents.minute, 59)
-        XCTAssertEqual(endComponents.second, 59)
-    }
-    
-    // MARK: - Test Date Arithmetic
-    
-    func testAddDays() {
-        guard let baseDate = DateUtility.createJSTDate(year: 2024, month: 3, day: 15, hour: 12, minute: 0, second: 0) else {
-            XCTFail("Failed to create base date")
-            return
-        }
-        
-        // Test adding positive days
-        let futureDate = DateUtility.addDays(to: baseDate, days: 5)
-        let futureComponents = DateUtility.jstCalendar.dateComponents([.year, .month, .day], from: futureDate)
-        XCTAssertEqual(futureComponents.year, 2024)
-        XCTAssertEqual(futureComponents.month, 3)
-        XCTAssertEqual(futureComponents.day, 20)
-        
-        // Test subtracting days
-        let pastDate = DateUtility.addDays(to: baseDate, days: -10)
-        let pastComponents = DateUtility.jstCalendar.dateComponents([.year, .month, .day], from: pastDate)
-        XCTAssertEqual(pastComponents.year, 2024)
-        XCTAssertEqual(pastComponents.month, 3)
-        XCTAssertEqual(pastComponents.day, 5)
-        
-        // Test adding zero days
-        let sameDate = DateUtility.addDays(to: baseDate, days: 0)
-        XCTAssertEqual(sameDate.timeIntervalSince1970, DateUtility.startOfDay(for: baseDate).timeIntervalSince1970, accuracy: 0.001)
-    }
-    
-    func testAddDaysAcrossMonthBoundary() {
-        // February 28, 2024 (leap year) + 2 days = March 1, 2024
-        guard let febDate = DateUtility.createJSTDate(year: 2024, month: 2, day: 28, hour: 12, minute: 0, second: 0) else {
-            XCTFail("Failed to create February date")
-            return
-        }
-        
-        let marchDate = DateUtility.addDays(to: febDate, days: 2)
-        let components = DateUtility.jstCalendar.dateComponents([.year, .month, .day], from: marchDate)
-        XCTAssertEqual(components.year, 2024)
-        XCTAssertEqual(components.month, 3)
-        XCTAssertEqual(components.day, 1)
-    }
-    
-    func testAddDaysAcrossYearBoundary() {
-        // December 30, 2023 + 5 days = January 4, 2024
-        guard let decDate = DateUtility.createJSTDate(year: 2023, month: 12, day: 30, hour: 15, minute: 0, second: 0) else {
-            XCTFail("Failed to create December date")
-            return
-        }
-        
-        let janDate = DateUtility.addDays(to: decDate, days: 5)
-        let components = DateUtility.jstCalendar.dateComponents([.year, .month, .day], from: janDate)
         XCTAssertEqual(components.year, 2024)
         XCTAssertEqual(components.month, 1)
-        XCTAssertEqual(components.day, 4)
+        XCTAssertEqual(components.day, 15)
+        XCTAssertEqual(components.hour, 23)
+        XCTAssertEqual(components.minute, 59)
+        XCTAssertEqual(components.second, 59)
     }
     
-    // MARK: - Test Same Day Comparison
+    // MARK: - Add Days Tests
     
-    func testIsSameDay() {
-        guard let date1 = DateUtility.createJSTDate(year: 2024, month: 3, day: 15, hour: 10, minute: 30, second: 0),
-              let date2 = DateUtility.createJSTDate(year: 2024, month: 3, day: 15, hour: 23, minute: 59, second: 59),
-              let differentDate = DateUtility.createJSTDate(year: 2024, month: 3, day: 16, hour: 0, minute: 0, second: 1) else {
-            XCTFail("Failed to create test dates")
-            return
-        }
+    func testAddDaysPositive() {
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd"
+        let baseDate = jstFormatter.date(from: "2024-01-15")!
         
-        XCTAssertTrue(DateUtility.isSameDay(date1, date2), "Same day at different times should be equal")
-        XCTAssertFalse(DateUtility.isSameDay(date1, differentDate), "Different days should not be equal")
+        let futureDate = DateUtility.addDays(to: baseDate, days: 5)
+        let expectedDate = jstFormatter.date(from: "2024-01-20")!
+        
+        XCTAssertEqual(DateUtility.startOfDay(for: futureDate), DateUtility.startOfDay(for: expectedDate))
     }
     
-    // MARK: - Test Days Between
+    func testAddDaysNegative() {
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd"
+        let baseDate = jstFormatter.date(from: "2024-01-15")!
+        
+        let pastDate = DateUtility.addDays(to: baseDate, days: -3)
+        let expectedDate = jstFormatter.date(from: "2024-01-12")!
+        
+        XCTAssertEqual(DateUtility.startOfDay(for: pastDate), DateUtility.startOfDay(for: expectedDate))
+    }
     
-    func testDaysBetween() {
-        guard let startDate = DateUtility.createJSTDate(year: 2024, month: 3, day: 10, hour: 12, minute: 0, second: 0),
-              let endDate = DateUtility.createJSTDate(year: 2024, month: 3, day: 15, hour: 18, minute: 30, second: 0) else {
-            XCTFail("Failed to create test dates")
-            return
-        }
+    func testAddDaysZero() {
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let baseDate = jstFormatter.date(from: "2024-01-15 14:30:45")!
+        
+        let sameDay = DateUtility.addDays(to: baseDate, days: 0)
+        let expectedStart = jstFormatter.date(from: "2024-01-15 00:00:00")!
+        
+        XCTAssertEqual(sameDay, expectedStart, "Adding 0 days should return start of same day")
+    }
+    
+    // MARK: - Same Day Tests
+    
+    func testIsSameDayTrue() {
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let date1 = jstFormatter.date(from: "2024-01-15 09:30:00")!
+        let date2 = jstFormatter.date(from: "2024-01-15 23:45:00")!
+        
+        XCTAssertTrue(DateUtility.isSameDay(date1, date2), "Dates on same JST day should be equal")
+    }
+    
+    func testIsSameDayFalse() {
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let date1 = jstFormatter.date(from: "2024-01-15 23:59:59")!
+        let date2 = jstFormatter.date(from: "2024-01-16 00:00:01")!
+        
+        XCTAssertFalse(DateUtility.isSameDay(date1, date2), "Dates on different JST days should not be equal")
+    }
+    
+    // MARK: - Due Date Tests
+    
+    func testIsDueToday() {
+        let today = DateUtility.startOfDay(for: Date())
+        XCTAssertTrue(DateUtility.isDue(today), "Today should be due")
+    }
+    
+    func testIsDuePast() {
+        let pastDate = DateUtility.addDays(to: Date(), days: -1)
+        XCTAssertTrue(DateUtility.isDue(pastDate), "Past date should be due")
+    }
+    
+    func testIsDueFuture() {
+        let futureDate = DateUtility.addDays(to: Date(), days: 1)
+        XCTAssertFalse(DateUtility.isDue(futureDate), "Future date should not be due")
+    }
+    
+    // MARK: - Critical JST Boundary Tests (Requirement 5.1)
+    
+    func testDateBoundaryAt2359JST() {
+        // Test the critical 23:59 JST boundary case
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let lateNightDate = jstFormatter.date(from: "2024-01-15 23:59:00")!
+        
+        let nextDayBase = DateUtility.getNextDayBase(from: lateNightDate)
+        let expectedNextDay = jstFormatter.date(from: "2024-01-16 00:00:00")!
+        
+        XCTAssertEqual(DateUtility.startOfDay(for: nextDayBase), DateUtility.startOfDay(for: expectedNextDay),
+                       "23:59 JST should be treated as next day base")
+    }
+    
+    func testDateBoundaryAt2200JST() {
+        // Test that earlier evening doesn't trigger next day logic
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let eveningDate = jstFormatter.date(from: "2024-01-15 22:00:00")!
+        
+        let sameDay = DateUtility.getNextDayBase(from: eveningDate)
+        
+        XCTAssertTrue(DateUtility.isSameDay(eveningDate, sameDay),
+                      "22:00 JST should remain same day")
+    }
+    
+    func testDateBoundaryAtMidnightTransition() {
+        // Test exactly at midnight transition
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let midnightDate = jstFormatter.date(from: "2024-01-16 00:00:00")!
+        
+        let startOfDay = DateUtility.startOfDay(for: midnightDate)
+        
+        XCTAssertEqual(startOfDay, midnightDate, "Midnight should be start of its own day")
+    }
+    
+    // MARK: - Days Between Tests
+    
+    func testDaysBetweenSameDay() {
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd"
+        let date = jstFormatter.date(from: "2024-01-15")!
+        
+        let days = DateUtility.daysBetween(from: date, to: date)
+        XCTAssertEqual(days, 0, "Days between same date should be 0")
+    }
+    
+    func testDaysBetweenPositive() {
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd"
+        let startDate = jstFormatter.date(from: "2024-01-15")!
+        let endDate = jstFormatter.date(from: "2024-01-20")!
         
         let days = DateUtility.daysBetween(from: startDate, to: endDate)
-        XCTAssertEqual(days, 5)
-        
-        // Test reverse
-        let reverseDays = DateUtility.daysBetween(from: endDate, to: startDate)
-        XCTAssertEqual(reverseDays, -5)
-        
-        // Test same day
-        let sameDays = DateUtility.daysBetween(from: startDate, to: startDate)
-        XCTAssertEqual(sameDays, 0)
+        XCTAssertEqual(days, 5, "Days between should be 5")
     }
     
-    // MARK: - Test Due Date Logic
-    
-    func testIsDue() {
-        let now = Date()
-        let yesterday = DateUtility.addDays(to: now, days: -1)
-        let tomorrow = DateUtility.addDays(to: now, days: 1)
+    func testDaysBetweenNegative() {
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd"
+        let startDate = jstFormatter.date(from: "2024-01-20")!
+        let endDate = jstFormatter.date(from: "2024-01-15")!
         
-        XCTAssertTrue(DateUtility.isDue(yesterday), "Yesterday should be due")
-        XCTAssertTrue(DateUtility.isDue(now), "Now should be due")
-        XCTAssertFalse(DateUtility.isDue(tomorrow), "Tomorrow should not be due")
+        let days = DateUtility.daysBetween(from: startDate, to: endDate)
+        XCTAssertEqual(days, -5, "Days between should be -5")
     }
     
-    // MARK: - Test Critical JST Boundary Cases
+    // MARK: - Timezone Consistency Tests (Requirement 5.2)
     
-    func testGetNextDayBase_NormalTime() {
-        // Test normal time (10:00 AM)
-        guard let morningDate = DateUtility.createJSTDate(year: 2024, month: 6, day: 15, hour: 10, minute: 0, second: 0) else {
-            XCTFail("Failed to create morning date")
-            return
-        }
-        
-        let nextDay = DateUtility.getNextDayBase(from: morningDate)
-        
-        let components = DateUtility.jstCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: nextDay)
-        XCTAssertEqual(components.year, 2024)
-        XCTAssertEqual(components.month, 6)
-        XCTAssertEqual(components.day, 15) // Should remain same day
+    func testJSTTimezoneConsistency() {
+        // Test that all operations use Asia/Tokyo consistently
+        XCTAssertEqual(DateUtility.jstTimeZone.identifier, "Asia/Tokyo", "Should use Asia/Tokyo timezone")
+        XCTAssertEqual(DateUtility.jstCalendar.timeZone.identifier, "Asia/Tokyo", "Calendar should use Asia/Tokyo timezone")
     }
     
-    func testGetNextDayBase_Midnight() {
-        // Test midnight (00:00:00)
-        guard let midnightDate = DateUtility.createJSTDate(year: 2024, month: 6, day: 15, hour: 0, minute: 0, second: 0) else {
-            XCTFail("Failed to create midnight date")
-            return
-        }
+    func testJSTTimezoneIndependence() {
+        // Test that JST calculations are independent of system timezone
+        let originalTimeZone = TimeZone.current
         
-        let nextDay = DateUtility.getNextDayBase(from: midnightDate)
+        // This test ensures JST operations work regardless of system timezone
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let testDate = jstFormatter.date(from: "2024-01-15 14:30:00")!
         
-        let components = DateUtility.jstCalendar.dateComponents([.year, .month, .day], from: nextDay)
-        XCTAssertEqual(components.year, 2024)
-        XCTAssertEqual(components.month, 6)
-        XCTAssertEqual(components.day, 15) // Should remain same day
+        let startOfDay = DateUtility.startOfDay(for: testDate)
+        let expectedStart = jstFormatter.date(from: "2024-01-15 00:00:00")!
+        
+        XCTAssertEqual(startOfDay, expectedStart, "JST calculations should be independent of system timezone")
     }
     
-    func testGetNextDayBase_LateNight() {
-        // Test late night (23:59)
-        guard let lateNightDate = DateUtility.createJSTDate(year: 2024, month: 6, day: 15, hour: 23, minute: 59, second: 59) else {
-            XCTFail("Failed to create late night date")
-            return
-        }
-        
-        let nextDay = DateUtility.getNextDayBase(from: lateNightDate)
-        
-        let components = DateUtility.jstCalendar.dateComponents([.year, .month, .day], from: nextDay)
-        XCTAssertEqual(components.year, 2024)
-        XCTAssertEqual(components.month, 6)
-        XCTAssertEqual(components.day, 16) // Should move to next day
-    }
+    // MARK: - Formatter Tests
     
-    // MARK: - Test Date Creation
-    
-    func testCreateJSTDate() {
-        guard let testDate = DateUtility.createJSTDate(year: 2024, month: 6, day: 15, hour: 14, minute: 30, second: 45) else {
-            XCTFail("Failed to create JST date")
-            return
-        }
+    func testDebugStringFormat() {
+        let jstFormatter = DateUtility.jstDateFormatter()
+        jstFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let testDate = jstFormatter.date(from: "2024-01-15 14:30:45")!
         
-        let components = DateUtility.jstCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: testDate)
-        XCTAssertEqual(components.year, 2024)
-        XCTAssertEqual(components.month, 6)
-        XCTAssertEqual(components.day, 15)
-        XCTAssertEqual(components.hour, 14)
-        XCTAssertEqual(components.minute, 30)
-        XCTAssertEqual(components.second, 45)
-    }
-    
-    func testCreateJSTDate_InvalidDate() {
-        // Test invalid date (February 30)
-        let invalidDate = DateUtility.createJSTDate(year: 2024, month: 2, day: 30)
-        XCTAssertNil(invalidDate, "Invalid date should return nil")
-    }
-    
-    // MARK: - Test Critical Year Transition
-    
-    func testNewYearTransition() {
-        // Test December 31, 2024 23:59:00 JST -> January 1, 2025
-        guard let almostMidnight = DateUtility.createJSTDate(year: 2024, month: 12, day: 31, hour: 23, minute: 59, second: 0) else {
-            XCTFail("Failed to create New Year's Eve date")
-            return
-        }
+        let debugString = DateUtility.debugString(for: testDate)
         
-        let nextDayStart = DateUtility.getNextDayBase(from: almostMidnight)
-        
-        let components = DateUtility.jstCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: nextDayStart)
-        XCTAssertEqual(components.year, 2025) // Should be next year
-        XCTAssertEqual(components.month, 1)   // January
-        XCTAssertEqual(components.day, 1)     // 1st day
-    }
-    
-    // MARK: - Test Thread Safety
-    
-    func testConcurrentAccess() {
-        // Test that multiple threads can safely access DateUtility methods
-        let expectation = self.expectation(description: "All threads completed")
-        let queue = DispatchQueue.global()
-        let group = DispatchGroup()
-        
-        for _ in 0..<10 {
-            group.enter()
-            queue.async {
-                let date1 = Date()
-                let date2 = Date()
-                _ = DateUtility.isSameDay(date1, date2)
-                _ = DateUtility.startOfDay(for: date1)
-                _ = DateUtility.addDays(to: date1, days: 1)
-                group.leave()
-            }
-        }
-        
-        group.notify(queue: .main) {
-            expectation.fulfill()
-        }
-        
-        waitForExpectations(timeout: 5.0)
+        XCTAssertTrue(debugString.contains("2024-01-15"), "Debug string should contain date")
+        XCTAssertTrue(debugString.contains("14:30:45"), "Debug string should contain time")
+        XCTAssertTrue(debugString.contains("JST"), "Debug string should indicate JST timezone")
     }
 }

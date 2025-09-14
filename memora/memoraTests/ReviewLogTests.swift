@@ -7,20 +7,22 @@ final class ReviewLogTests: XCTestCase {
     
     func testInitializationWithAllParameters() {
         let cardId = UUID()
-        let reviewedAt = Date()
+        let beforeCreation = Date()
         
         let reviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
             previousStep: 2,
             nextStep: 3,
             result: true,
             latencyMs: 5000
         )
         
+        let afterCreation = Date()
+        
         XCTAssertNotNil(reviewLog.id)
         XCTAssertEqual(reviewLog.cardId, cardId)
-        XCTAssertEqual(reviewLog.reviewedAt, reviewedAt)
+        XCTAssertGreaterThanOrEqual(reviewLog.reviewedAt, beforeCreation)
+        XCTAssertLessThanOrEqual(reviewLog.reviewedAt, afterCreation)
         XCTAssertEqual(reviewLog.previousStep, 2)
         XCTAssertEqual(reviewLog.nextStep, 3)
         XCTAssertEqual(reviewLog.result, true)
@@ -29,11 +31,9 @@ final class ReviewLogTests: XCTestCase {
     
     func testUniqueIdGeneration() {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         let reviewLog1 = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
             previousStep: 0,
             nextStep: 1,
             result: true,
@@ -42,7 +42,6 @@ final class ReviewLogTests: XCTestCase {
         
         let reviewLog2 = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
             previousStep: 0,
             nextStep: 1,
             result: true,
@@ -56,11 +55,10 @@ final class ReviewLogTests: XCTestCase {
     
     func testCorrectAnswerStepProgression() {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         let reviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 2,
             nextStep: 3,
             result: true,
@@ -74,11 +72,10 @@ final class ReviewLogTests: XCTestCase {
     
     func testIncorrectAnswerStepReset() {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         let reviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 4,
             nextStep: 0,
             result: false,
@@ -92,11 +89,10 @@ final class ReviewLogTests: XCTestCase {
     
     func testFirstReviewStartingStep() {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         let reviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 0,
             nextStep: 1,
             result: true,
@@ -118,7 +114,7 @@ final class ReviewLogTests: XCTestCase {
         
         let reviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: specificDate,
+            
             previousStep: 1,
             nextStep: 2,
             result: true,
@@ -134,7 +130,7 @@ final class ReviewLogTests: XCTestCase {
         
         let reviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: Date(),
+            
             previousStep: 3,
             nextStep: 4,
             result: true,
@@ -151,11 +147,10 @@ final class ReviewLogTests: XCTestCase {
     
     func testZeroLatency() {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         let reviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 0,
             nextStep: 1,
             result: true,
@@ -167,11 +162,10 @@ final class ReviewLogTests: XCTestCase {
     
     func testHighLatency() {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         let reviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 2,
             nextStep: 0,
             result: false,
@@ -185,11 +179,10 @@ final class ReviewLogTests: XCTestCase {
     
     func testJSONEncodingAndDecoding() throws {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         let originalReviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 3,
             nextStep: 4,
             result: true,
@@ -218,12 +211,11 @@ final class ReviewLogTests: XCTestCase {
     func testMultipleReviewLogsJSONArray() throws {
         let cardId1 = UUID()
         let cardId2 = UUID()
-        let reviewedAt = Date()
         
         let reviewLogs = [
             ReviewLog(
                 cardId: cardId1,
-                reviewedAt: reviewedAt,
+                
                 previousStep: 0,
                 nextStep: 1,
                 result: true,
@@ -231,7 +223,7 @@ final class ReviewLogTests: XCTestCase {
             ),
             ReviewLog(
                 cardId: cardId2,
-                reviewedAt: reviewedAt,
+                
                 previousStep: 2,
                 nextStep: 0,
                 result: false,
@@ -257,11 +249,10 @@ final class ReviewLogTests: XCTestCase {
     
     func testMaxStepValues() {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         let reviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: Int.max,
             nextStep: Int.max,
             result: true,
@@ -275,13 +266,12 @@ final class ReviewLogTests: XCTestCase {
     
     func testNegativeStepValues() {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         // Even though negative steps don't make sense in the context,
         // the model should handle them without crashing
         let reviewLog = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: -1,
             nextStep: -2,
             result: false,
@@ -296,12 +286,11 @@ final class ReviewLogTests: XCTestCase {
     
     func testReviewLogCreationForDifferentScenarios() {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         // Scenario 1: First correct review
         let firstCorrect = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 0,
             nextStep: 1,
             result: true,
@@ -311,7 +300,7 @@ final class ReviewLogTests: XCTestCase {
         // Scenario 2: Advanced correct review
         let advancedCorrect = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 4,
             nextStep: 5,
             result: true,
@@ -321,7 +310,7 @@ final class ReviewLogTests: XCTestCase {
         // Scenario 3: Reset after incorrect
         let resetIncorrect = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 3,
             nextStep: 0,
             result: false,
@@ -336,12 +325,11 @@ final class ReviewLogTests: XCTestCase {
     
     func testReviewLogForLearningAnalytics() {
         let cardId = UUID()
-        let reviewedAt = Date()
         
         // Fast correct answer (good retention)
         let fastCorrect = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 2,
             nextStep: 3,
             result: true,
@@ -351,7 +339,7 @@ final class ReviewLogTests: XCTestCase {
         // Slow correct answer (struggling but correct)
         let slowCorrect = ReviewLog(
             cardId: cardId,
-            reviewedAt: reviewedAt,
+            
             previousStep: 1,
             nextStep: 2,
             result: true,
