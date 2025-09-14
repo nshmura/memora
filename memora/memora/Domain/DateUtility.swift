@@ -102,6 +102,30 @@ class DateUtility {
         return components.day ?? 0
     }
     
+    // MARK: - Date Creation Helpers
+    
+    /// Create a JST date with specific components
+    /// - Parameters:
+    ///   - year: Year component
+    ///   - month: Month component (1-12)
+    ///   - day: Day component
+    ///   - hour: Hour component (0-23), defaults to 0
+    ///   - minute: Minute component (0-59), defaults to 0
+    ///   - second: Second component (0-59), defaults to 0
+    /// - Returns: Date created in JST timezone, or nil if invalid components
+    static func createJSTDate(year: Int, month: Int, day: Int, hour: Int = 0, minute: Int = 0, second: Int = 0) -> Date? {
+        var components = DateComponents()
+        components.timeZone = jstTimeZone
+        components.year = year
+        components.month = month
+        components.day = day
+        components.hour = hour
+        components.minute = minute
+        components.second = second
+        
+        return jstCalendar.date(from: components)
+    }
+    
     // MARK: - Formatting Helpers
     
     /// Get a date formatter configured for JST

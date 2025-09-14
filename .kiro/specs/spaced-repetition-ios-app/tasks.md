@@ -33,7 +33,7 @@
     - StoreのUnit Test作成（保存・読み込み・エラーケース）
     - _Requirements: 4.3_
 
-- [ ] 4. 日付・タイムゾーン処理の実装
+- [x] 4. 日付・タイムゾーン処理の実装
   - [x] 4.1 JST日付ユーティリティの作成
     - Asia/Tokyoタイムゾーンでの日付開始時刻計算
     - 日付境界処理のUnit Test作成
@@ -44,20 +44,20 @@
     - 間隔テーブル[0,1,2,4,7,15,30]を使用した次回復習日計算
     - _Requirements: 1.3, 1.4, 5.1_
 
-  - [ ] 4.3 Schedulerの包括的テスト
+  - [x] 4.3 Schedulerの包括的テスト
     - 正解時stepIndex増加テスト
     - 不正解時stepIndex=0、明日設定テスト
     - 23:59 JST境界テスト
     - _Requirements: 5.3, 7.1_
 
-- [ ] 5. HomeView画面の実装
-  - [ ] 5.1 HomeViewModelの作成
+- [x] 5. HomeView画面の実装
+  - [x] 5.1 HomeViewModelの作成
     - 今日の復習枚数計算ロジック
     - 連続学習日数計算ロジック
     - 次回通知予定表示ロジック
     - _Requirements: 2.1_
 
-  - [ ] 5.2 HomeViewのUI実装
+  - [x] 5.2 HomeViewのUI実装
     - SwiftUIでHome画面レイアウト作成
     - 学習開始ボタンとナビゲーション
     - 基本的なレイアウトとスタイリング

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var store: Store
+    @StateObject private var viewModel = HomeViewModel()
     
     var body: some View {
         NavigationView {
@@ -16,20 +17,21 @@ struct HomeView: View {
                 Text("今日の復習")
                     .font(.title2)
                 
-                Text("0枚")
+                Text("\(viewModel.todayReviewCount)枚")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 
-                Text("🔥 連続日数: 0日")
+                Text("🔥 連続日数: \(viewModel.consecutiveDays)日")
                     .font(.headline)
                 
                 Button("学習を始める") {
-                    // TODO: Navigate to Study
+                    // TODO: Navigate to StudyView
                 }
                 .buttonStyle(.borderedProminent)
                 .padding()
+                .disabled(viewModel.todayReviewCount == 0)
                 
-                Text("次回通知: 設定してください")
+                Text("次回通知: \(viewModel.nextNotificationTime)")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
@@ -37,6 +39,10 @@ struct HomeView: View {
             }
             .navigationTitle("Memora")
             .padding()
+            .onAppear {
+                viewModel.updateStore(store)
+                viewModel.refresh()
+            }
         }
     }
 }
