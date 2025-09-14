@@ -23,18 +23,21 @@ struct EditCardView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(spacing: 20) {
                     CardInfoView(card: card)
+                    
                     QuestionInputView(question: $question)
+                    
                     AnswerInputView(answer: $answer)
+                    
                     TagInputView(
                         tagInput: $tagInput,
                         selectedTags: $selectedTags,
                         availableTags: viewModel.availableTags,
-                        onAddTag: addTag
+                        onAddTag: {
+                            addTag()
+                        }
                     )
-                    DeleteButtonView(onDelete: { showingDeleteConfirmation = true })
-                    Spacer(minLength: 50)
                 }
                 .padding()
             }
