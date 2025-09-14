@@ -162,6 +162,7 @@
 import Foundation
 import UIKit
 import UserNotifications
+@testable import memora
 
 // Import required for mach_task_basic_info
 import Darwin.Mach
@@ -194,8 +195,8 @@ class DeviceTestingUtils {
         var cards: [Card] = []
         for i in 1...count {
             let card = Card(
-                front: "Test Question \(i): What is the answer to question number \(i)?",
-                back: "Answer \(i): This is the detailed answer to question \(i). Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+                question: "Test Question \(i): What is the answer to question number \(i)?",
+                answer: "Answer \(i): This is the detailed answer to question \(i). Lorem ipsum dolor sit amet, consectetur adipiscing elit."
             )
             cards.append(card)
         }
@@ -251,7 +252,7 @@ class DeviceTestingUtils {
         do {
             let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
             let values = try documentsPath.resourceValues(forKeys: [.volumeAvailableCapacityKey])
-            return values.volumeAvailableCapacity ?? 0
+            return Int64(values.volumeAvailableCapacity ?? 0)
         } catch {
             return 0
         }

@@ -18,27 +18,75 @@ struct SettingsView: View {
     
     var body: some View {
         List {
-                Section {
+                Section(header: Text("通知設定")) {
                     // Notification Time Setting
                     HStack {
                         Text("通知時刻")
                         Spacer()
-                        Picker("通知時刻", selection: $settingsViewModel.morningHour) {
+                        Picker("通知時刻", selection: Binding(
+                            get: { settingsViewModel.morningHour },
+                            set: { settingsViewModel.updateMorningHour($0) }
+                        )) {
                             ForEach(0..<24, id: \.self) { hour in
                                 Text(String(format: "%02d:00", hour))
                                     .tag(hour)
                             }
                         }
                         .pickerStyle(.menu)
+                        .labelsHidden()
                     }
                     
                     // Notification Status
                     HStack {
                         Text("通知ステータス")
                         Spacer()
-                        Text(settingsViewModel.notificationStatusString)
-                            .font(.caption)
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(settingsViewModel.notificationStatusString)
+                                .font(.caption)
+                                .foregroundColor(settingsViewModel.notificationPermissionStatus == .authorized ? .green : .red)
+                            
+                            if settingsViewModel.notificationPermissionStatus != .authorized {
+                                Button("許可を求める") {
+                                    Task {
+                                        await settingsViewModel.requestNotificationPermission()
+                                    }
+                                }
+                                .font(.caption2)
+                                .foregroundColor(.blue)
+                            }
+                        }
+                    }
+                    
+                    if settingsViewModel.notificationPermissionStatus == .authorized {
+                        Toggle("通知を有効にする", isOn: Binding(
+                            get: { settingsViewModel.notificationEnabled },
+                            set: { settingsViewModel.updateNotificationEnabled($0) }
+                        ))
+                        .font(.subheadline)
+                    } else {
+                        Text("復習のリマインダー通知を受け取るには、通知を許可してください。")
+                            .font(.caption2)
                             .foregroundColor(.secondary)
+                    }
+                }
+                
+                Section(header: Text("外観設定")) {
+                    HStack {
+                        Text("テーマ")
+                        Spacer()
+                        Picker("テーマ", selection: Binding(
+                            get: { store.settings.theme },
+                            set: { newTheme in
+                                store.settings.theme = newTheme
+                                store.saveSettings()
+                            }
+                        )) {
+                            ForEach(AppTheme.allCases, id: \.self) { theme in
+                                Text(theme.displayName)
+                                    .tag(theme)
+                            }
+                        }
+                        .pickerStyle(.menu)
                     }
                 }
                 

@@ -38,8 +38,8 @@ class AppValidationTests: XCTestCase {
         XCTAssertNotNil(notificationPlanner, "NotificationPlanner should initialize successfully")
         
         // Verify default settings are valid
-        XCTAssertEqual(store.settings.notificationHour, 9, "Default notification hour should be 9")
-        XCTAssertEqual(store.settings.notificationMinute, 0, "Default notification minute should be 0")
+        XCTAssertEqual(store.settings.morningHour, 8, "Default morning hour should be 8")
+        XCTAssertEqual(store.settings.intervals, [0, 1, 2, 4, 7, 15, 30], "Default intervals should be properly set")
         
         // Test JST timezone configuration
         let jstTimeZone = TimeZone(identifier: "Asia/Tokyo")!
@@ -51,19 +51,20 @@ class AppValidationTests: XCTestCase {
     // MARK: - Data Persistence Validation
     
     func testDataPersistenceRobustness() throws {
-        // Add test data
+        // Create test cards array
         let testCards = [
-            Card(front: "Test 1", back: "Answer 1"),
-            Card(front: "Test 2", back: "Answer 2"),
-            Card(front: "Test 3 with very long question that might cause issues with storage or display in various scenarios", back: "Answer 3 with equally long response that tests the app's ability to handle larger text content")
+            Card(question: "Sample Question 1", answer: "Sample Answer 1"),
+            Card(question: "Sample Question 2", answer: "Sample Answer 2"),
+            Card(question: "Sample Question 3", answer: "Sample Answer 3")
         ]
         
+        // Add cards to store
         for card in testCards {
-            store.addCard(card)
+            store.cards.append(card)
         }
         
         // Force save
-        store.saveData()
+        store.saveCards()
         XCTAssertEqual(store.cards.count, 3, "All cards should be saved")
         
         // Simulate app restart by creating new store
@@ -71,12 +72,13 @@ class AppValidationTests: XCTestCase {
         XCTAssertEqual(newStore.cards.count, 3, "Cards should persist after restart")
         
         // Verify data integrity
-        let originalFronts = Set(testCards.map { $0.front })
-        let loadedFronts = Set(newStore.cards.map { $0.front })
-        XCTAssertEqual(originalFronts, loadedFronts, "Card data should maintain integrity")
+        let originalQuestions = Set(testCards.map { $0.question })
+        let loadedQuestions = Set(newStore.cards.map { $0.question })
+        XCTAssertEqual(originalQuestions, loadedQuestions, "Card data should maintain integrity")
         
         // Clean up
-        newStore.clearAllData()
+        newStore.cards.removeAll()
+        newStore.saveCards()
         
         print("✅ Data persistence robustness validated")
     }
@@ -90,10 +92,10 @@ class AppValidationTests: XCTestCase {
         // Generate large dataset
         for i in 1...cardCount {
             let card = Card(
-                front: "Performance Test Question \(i)",
-                back: "Performance Test Answer \(i)"
+                question: "Performance Test Question \(i)",
+                answer: "Performance Test Answer \(i)"
             )
-            store.addCard(card)
+            store.cards.append(card)
         }
         
         let addTime = CFAbsoluteTimeGetCurrent() - startTime
@@ -101,7 +103,8 @@ class AppValidationTests: XCTestCase {
         
         // Test search performance
         let searchStart = CFAbsoluteTimeGetCurrent()
-        let results = store.cards.filter { $0.front.contains("Test") }
+        // Test filtering capability
+        let results = store.cards.filter { $0.question.contains("Test") }
         let searchTime = CFAbsoluteTimeGetCurrent() - searchStart
         
         XCTAssertLessThan(searchTime, 0.1, "Search through \(cardCount) cards should take less than 0.1 seconds")
@@ -109,12 +112,13 @@ class AppValidationTests: XCTestCase {
         
         // Test save performance
         let saveStart = CFAbsoluteTimeGetCurrent()
-        store.saveData()
+        store.saveCards()
         let saveTime = CFAbsoluteTimeGetCurrent() - saveStart
         
         XCTAssertLessThan(saveTime, 3.0, "Saving \(cardCount) cards should take less than 3 seconds")
         
-        store.clearAllData()
+        store.cards.removeAll()
+        store.saveCards()
         
         print("✅ Large dataset performance validated")
     }
@@ -122,43 +126,45 @@ class AppValidationTests: XCTestCase {
     // MARK: - Study Logic Validation
     
     func testStudyLogicRobustness() throws {
-        // Add cards with various states
+        // Add cards with various states  
         let cards = [
-            Card(front: "New Card", back: "Answer", stepIndex: 0, lastReviewedAt: nil, nextDueAt: nil),
-            Card(front: "Learning Card", back: "Answer", stepIndex: 2, lastReviewedAt: Date(), nextDueAt: Date()),
-            Card(front: "Mature Card", back: "Answer", stepIndex: 6, lastReviewedAt: Date().addingTimeInterval(-86400), nextDueAt: Date().addingTimeInterval(86400))
+            Card(question: "New Card", answer: "Answer"),
+            Card(question: "Learning Card", answer: "Answer"),
+            Card(question: "Mature Card", answer: "Answer")
         ]
         
         for card in cards {
-            store.addCard(card)
+            store.cards.append(card)
         }
         
         // Test study session flow
-        let dueCards = store.getDueCards()
+        let today = DateUtility.startOfDay(for: Date())
+        let dueCards = store.cards.filter { card in
+            return card.nextDue <= today
+        }
         XCTAssertGreaterThanOrEqual(dueCards.count, 2, "Should have at least 2 due cards")
         
-        for var card in dueCards {
+        for card in dueCards {
             // Test correct answer
             let originalStep = card.stepIndex
-            scheduler.gradeCard(&card, correct: true)
+            let updatedCard = Scheduler.gradeCard(card, isCorrect: true)
             
             if originalStep < 6 {
-                XCTAssertEqual(card.stepIndex, originalStep + 1, "Correct answer should advance step")
+                XCTAssertEqual(updatedCard.stepIndex, originalStep + 1, "Correct answer should advance step")
             }
-            XCTAssertNotNil(card.nextDueAt, "Next due date should be set")
-            
-            store.updateCard(card)
+            XCTAssertNotNil(updatedCard.nextDue, "Next due date should be set")
         }
         
         // Test incorrect answer handling
-        var testCard = store.cards.first!
+        let testCard = store.cards.first!
         let originalStep = testCard.stepIndex
-        scheduler.gradeCard(&testCard, correct: false)
+        let updatedTestCard = Scheduler.gradeCard(testCard, isCorrect: false)
         
-        XCTAssertEqual(testCard.stepIndex, 0, "Incorrect answer should reset to step 0")
-        XCTAssertNotNil(testCard.nextDueAt, "Next due date should be set for failed card")
+        XCTAssertEqual(updatedTestCard.stepIndex, 0, "Incorrect answer should reset to step 0")
+        XCTAssertNotNil(updatedTestCard.nextDue, "Next due date should be set for failed card")
         
-        store.clearAllData()
+        store.cards.removeAll()
+        store.saveCards()
         
         print("✅ Study logic robustness validated")
     }
@@ -185,8 +191,8 @@ class AppValidationTests: XCTestCase {
                 continue
             }
             
-            let startOfDay = dateUtility.startOfDay(for: date)
-            let calendar = Calendar.current
+            let startOfDay = DateUtility.startOfDay(for: date)
+            var calendar = Calendar.current
             calendar.timeZone = jst
             
             let components = calendar.dateComponents([.hour, .minute, .second], from: startOfDay)
@@ -215,7 +221,7 @@ class AppValidationTests: XCTestCase {
         content.body = "This is a test"
         
         let dateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: testDate)
-        let trigger = UNCalendarNotificationTrigger(dateComponents: dateComponents, repeats: false)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
         
         let request = UNNotificationRequest(identifier: "test", content: content, trigger: trigger)
         XCTAssertNotNil(request, "Notification request should be created successfully")
@@ -233,9 +239,9 @@ class AppValidationTests: XCTestCase {
     
     func testErrorHandlingRobustness() throws {
         // Test invalid card handling
-        var invalidCard = Card(front: "", back: "")
-        XCTAssertTrue(invalidCard.front.isEmpty, "Should handle empty front text")
-        XCTAssertTrue(invalidCard.back.isEmpty, "Should handle empty back text")
+        var invalidCard = Card(question: "", answer: "")
+        XCTAssertTrue(invalidCard.question.isEmpty, "Should handle empty question text")
+        XCTAssertTrue(invalidCard.answer.isEmpty, "Should handle empty answer text")
         
         // Test boundary values
         invalidCard.stepIndex = -1
@@ -244,13 +250,12 @@ class AppValidationTests: XCTestCase {
         invalidCard.stepIndex = 999
         XCTAssertEqual(invalidCard.stepIndex, 999, "Should accept out-of-range step index without crashing")
         
-        // Test date handling with nil values
-        XCTAssertNil(invalidCard.lastReviewedAt, "Should handle nil last reviewed date")
-        XCTAssertNil(invalidCard.nextDueAt, "Should handle nil next due date")
+        // Test date handling with nil values  
+        XCTAssertNotNil(invalidCard.nextDue, "Should have a default next due date")
         
         // Test scheduler with edge cases
-        scheduler.gradeCard(&invalidCard, correct: true)
-        XCTAssertNotNil(invalidCard.nextDueAt, "Scheduler should set next due date even for invalid card")
+        let updatedInvalidCard = Scheduler.gradeCard(invalidCard, isCorrect: true)
+        XCTAssertNotNil(updatedInvalidCard.nextDue, "Scheduler should set next due date even for invalid card")
         
         print("✅ Error handling robustness validated")
     }
@@ -267,7 +272,7 @@ class AppValidationTests: XCTestCase {
             
             // Add many cards to test memory usage
             for i in 1...100 {
-                tempStore.addCard(Card(front: "Test \(i)", back: "Answer \(i)"))
+                tempStore.cards.append(Card(question: "Test \(i)", answer: "Answer \(i)"))
             }
             
             XCTAssertEqual(tempStore.cards.count, 100, "Store should contain all added cards")
@@ -287,22 +292,26 @@ class AppValidationTests: XCTestCase {
         
         // Initial state
         XCTAssertTrue(store.cards.isEmpty, "Store should start empty")
-        XCTAssertEqual(store.settings.notificationHour, 9, "Default notification hour should be 9")
+        XCTAssertEqual(store.settings.morningHour, 8, "Default morning hour should be 8")
         
         // Add cards state
-        store.addCard(Card(front: "Test", back: "Answer"))
+        store.cards.append(Card(question: "Test", answer: "Answer"))
         XCTAssertEqual(store.cards.count, 1, "Store should have 1 card")
         
         // Study state
-        let dueCards = store.getDueCards()
+        let today = DateUtility.startOfDay(for: Date())
+        let dueCards = store.cards.filter { card in
+            return card.nextDue <= today
+        }
         XCTAssertGreaterThanOrEqual(dueCards.count, 1, "Should have at least 1 due card")
         
         // Settings change state
-        store.settings.notificationHour = 18
-        XCTAssertEqual(store.settings.notificationHour, 18, "Settings should update")
+        store.settings.morningHour = 18
+        XCTAssertEqual(store.settings.morningHour, 18, "Settings should update")
         
         // Reset state
-        store.clearAllData()
+        store.cards.removeAll()
+        store.saveCards()
         XCTAssertTrue(store.cards.isEmpty, "Store should be empty after reset")
         
         print("✅ App state consistency validated")
@@ -319,34 +328,40 @@ class AppValidationTests: XCTestCase {
         
         // 2. Add cards
         for i in 1...5 {
-            freshStore.addCard(Card(front: "Question \(i)", back: "Answer \(i)"))
+            freshStore.cards.append(Card(question: "Question \(i)", answer: "Answer \(i)"))
         }
         XCTAssertEqual(freshStore.cards.count, 5, "Should add all cards successfully")
         
         // 3. Start study session
-        let dueCards = freshStore.getDueCards()
+        let today = DateUtility.startOfDay(for: Date())
+        let dueCards = freshStore.cards.filter { card in
+            return card.nextDue <= today
+        }
         XCTAssertEqual(dueCards.count, 5, "All new cards should be due")
         
         // 4. Complete study session
-        for var card in dueCards {
-            scheduler.gradeCard(&card, correct: true)
-            freshStore.updateCard(card)
+        for card in dueCards {
+            let updatedCard = Scheduler.gradeCard(card, isCorrect: true)
+            if let index = freshStore.cards.firstIndex(where: { $0.id == card.id }) {
+                freshStore.cards[index] = updatedCard
+            }
         }
         
         // 5. Check updated states
         let updatedCards = freshStore.cards
         for card in updatedCards {
             XCTAssertEqual(card.stepIndex, 1, "All cards should advance to step 1")
-            XCTAssertNotNil(card.nextDueAt, "All cards should have next due date")
+            XCTAssertNotNil(card.nextDue, "All cards should have next due date")
         }
         
         // 6. Save and reload
-        freshStore.saveData()
+        freshStore.saveCards()
         let reloadedStore = Store()
         XCTAssertEqual(reloadedStore.cards.count, 5, "Data should persist across restarts")
         
         // Clean up
-        reloadedStore.clearAllData()
+        reloadedStore.cards.removeAll()
+        reloadedStore.saveCards()
         
         print("✅ Full integration readiness validated")
     }

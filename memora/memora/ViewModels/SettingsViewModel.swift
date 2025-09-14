@@ -13,18 +13,23 @@ class SettingsViewModel: ObservableObject {
     @Published var morningHour: Int = 8
     @Published var intervals: [Int] = [0, 1, 2, 4, 7, 15, 30]
     @Published var notificationPermissionStatus: UNAuthorizationStatus = .notDetermined
+    @Published var notificationEnabled: Bool = true
     
     private var store: Store
     
     init(store: Store = Store()) {
         self.store = store
         loadSettings()
-        checkNotificationPermission()
+        // Don't call checkNotificationPermission here to avoid async in init
     }
     
     func updateStore(_ store: Store) {
         self.store = store
         loadSettings()
+        // Refresh notification permissions when store is updated
+        Task {
+            await checkNotificationPermissions()
+        }
     }
     
     // MARK: - Settings Loading
@@ -32,6 +37,7 @@ class SettingsViewModel: ObservableObject {
     private func loadSettings() {
         morningHour = store.settings.morningHour
         intervals = store.settings.intervals
+        notificationEnabled = store.settings.notificationEnabled
     }
     
     // MARK: - Morning Hour Management
@@ -41,6 +47,7 @@ class SettingsViewModel: ObservableObject {
             return
         }
         
+        // Update local state
         morningHour = newHour
         
         // Update store settings
@@ -54,16 +61,29 @@ class SettingsViewModel: ObservableObject {
         }
     }
     
-    // MARK: - Notification Permission Management
+    // MARK: - Notification Enable/Disable Management
     
-    private func checkNotificationPermission() {
+    func updateNotificationEnabled(_ enabled: Bool) {
+        // Update local state
+        notificationEnabled = enabled
+        
+        // Update store settings
+        var updatedSettings = store.settings
+        updatedSettings.notificationEnabled = enabled
+        store.updateSettings(updatedSettings)
+        
+        // Reorganize notifications based on enabled state
         Task {
-            let current = await UNUserNotificationCenter.current().notificationSettings()
-            await MainActor.run {
-                self.notificationPermissionStatus = current.authorizationStatus
+            if enabled {
+                await reorganizeNotifications()
+            } else {
+                // Cancel all notifications if disabled
+                UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
             }
         }
     }
+    
+    // MARK: - Notification Permission Management
     
     func checkNotificationPermissions() async {
         let current = await UNUserNotificationCenter.current().notificationSettings()
@@ -82,11 +102,13 @@ class SettingsViewModel: ObservableObject {
             }
             
             if granted {
+                // 通知が許可された場合、通知を再編成
                 await reorganizeNotifications()
             }
             
             return granted
         } catch {
+            print("Failed to request notification authorization: \(error)")
             await MainActor.run {
                 self.notificationPermissionStatus = .denied
             }
@@ -100,13 +122,12 @@ class SettingsViewModel: ObservableObject {
         // Cancel all existing notifications
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
         
-        // Only schedule new notifications if permission is granted
-        guard notificationPermissionStatus == .authorized else {
+        // Only schedule new notifications if permission is granted and notifications are enabled
+        guard notificationPermissionStatus == .authorized && notificationEnabled else {
             return
         }
         
         // Schedule morning reminder for tomorrow and several days ahead
-        let calendar = Calendar.current
         var dateComponents = DateComponents()
         dateComponents.timeZone = TimeZone(identifier: "Asia/Tokyo")
         dateComponents.hour = morningHour

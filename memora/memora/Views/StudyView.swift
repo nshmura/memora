@@ -41,15 +41,7 @@ struct StudyView: View {
         }
         .alert("学習完了！", isPresented: $showingCompletion) {
             Button("OK") {
-                Task {
-                    let notificationPlanner = NotificationPlanner()
-                    let granted = await notificationPlanner.requestAuthorization()
-                    if granted {
-                        print("Notification permission granted")
-                    } else {
-                        print("Notification permission denied")
-                    }
-                }
+                // 学習完了時は単純にアラートを閉じるだけ
             }
         } message: {
             Text("今日の復習が完了しました。お疲れ様でした！")
@@ -114,9 +106,22 @@ struct StudyView: View {
                 // Answer input field (only show if not submitted and not showing "don't know")
                 if !submittedAnswer && !showingAnswer {
                     VStack(spacing: 12) {
-                        TextField("答えを入力する", text: $userAnswer)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .font(.title3)
+                        VStack(alignment: .leading, spacing: 4) {
+                            if userAnswer.isEmpty {
+                                Text("答えを入力する")
+                                    .foregroundColor(.secondary)
+                                    .font(.title3)
+                                    .padding(.leading, 4)
+                            }
+                            
+                            TextEditor(text: $userAnswer)
+                                .font(.title3)
+                                .frame(minHeight: 60)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                )
+                        }
                         
                         HStack(spacing: 12) {
                             // Submit Answer button
@@ -127,31 +132,33 @@ struct StudyView: View {
                                     Image(systemName: "arrow.forward.circle")
                                     Text("回答する")
                                 }
-                                .font(.title3)
-                                .fontWeight(.medium)
+                                .font(.title2)
+                                .fontWeight(.semibold)
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
-                                .padding()
+                                .padding(.vertical, 16)
+                                .padding(.horizontal, 24)
                                 .background(userAnswer.isEmpty ? Color.gray : Color.blue)
                                 .cornerRadius(12)
                             }
                             .disabled(userAnswer.isEmpty)
                             
-                            // Don't Know button
+                            // Don't Know button - smaller and less prominent
                             Button(action: {
                                 showDontKnow()
                             }) {
-                                HStack {
-                                    Image(systemName: "questionmark.circle")
-                                    Text("🤔 分からない")
+                                HStack(spacing: 4) {
+                                    Image(systemName: "questionmark.circle.fill")
+                                        .font(.caption)
+                                    Text("分からない")
+                                        .font(.caption)
                                 }
-                                .font(.title3)
                                 .fontWeight(.medium)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.orange)
-                                .cornerRadius(12)
+                                .foregroundColor(.secondary)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .background(Color(.systemGray5))
+                                .cornerRadius(8)
                             }
                         }
                     }

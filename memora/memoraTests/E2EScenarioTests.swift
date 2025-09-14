@@ -46,12 +46,7 @@ final class E2EScenarioTests: XCTestCase {
         // When: カードを追加
         let card = Card(
             question: "テスト問題",
-            answer: "テスト回答",
-            stepIndex: 0,
-            nextDue: Date(),
-            reviewCount: 0,
-            lastResult: nil,
-            tags: []
+            answer: "テスト回答"
         )
         store.cards.append(card)
         store.saveCards()
@@ -61,7 +56,7 @@ final class E2EScenarioTests: XCTestCase {
         XCTAssertEqual(store.cards.first?.question, "テスト問題")
         
         // When: 学習を開始（今日復習すべきカード取得）
-        let today = DateUtility.startOfDay(for: Date(), in: DateUtility.jstTimeZone)
+        let today = DateUtility.startOfDay(for: Date())
         let cardsToReview = store.cards.filter { $0.nextDue <= today }
         
         // Then: 今日復習すべきカードが取得される
@@ -87,24 +82,14 @@ final class E2EScenarioTests: XCTestCase {
     
     func testDailyStudyFlow() async throws {
         // Given: 既存カードがあり、今日復習予定
-        let today = DateUtility.startOfDay(for: Date(), in: DateUtility.jstTimeZone)
+        let today = DateUtility.startOfDay(for: Date())
         let card1 = Card(
             question: "問題1",
-            answer: "回答1",
-            stepIndex: 1,
-            nextDue: today,
-            reviewCount: 3,
-            lastResult: true,
-            tags: []
+            answer: "回答1"
         )
         let card2 = Card(
             question: "問題2", 
-            answer: "回答2",
-            stepIndex: 0,
-            nextDue: today,
-            reviewCount: 1,
-            lastResult: false,
-            tags: []
+            answer: "回答2"
         )
         
         store.cards = [card1, card2]
@@ -138,7 +123,7 @@ final class E2EScenarioTests: XCTestCase {
         XCTAssertEqual(gradedCard2.reviewCount, 2)
         
         let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: today)!
-        let expectedTomorrow = DateUtility.startOfDay(for: tomorrow, in: DateUtility.jstTimeZone)
+        let expectedTomorrow = DateUtility.startOfDay(for: tomorrow)
         XCTAssertEqual(gradedCard2.nextDue, expectedTomorrow)
         
         // When: 学習完了後、通知再編成
@@ -192,12 +177,7 @@ final class E2EScenarioTests: XCTestCase {
         
         let card = Card(
             question: "境界テスト",
-            answer: "テスト回答", 
-            stepIndex: 0,
-            nextDue: jstDate,
-            reviewCount: 0,
-            lastResult: nil,
-            tags: []
+            answer: "テスト回答"
         )
         
         // When: 正解して次回復習日を計算
@@ -226,10 +206,6 @@ final class E2EScenarioTests: XCTestCase {
                 Card(
                     question: "問題\(i)",
                     answer: "回答\(i)",
-                    stepIndex: Int.random(in: 0...6),
-                    nextDue: Date(),
-                    reviewCount: Int.random(in: 0...50),
-                    lastResult: Bool.random(),
                     tags: ["タグ\(i % 10)"]
                 )
             }
@@ -237,7 +213,7 @@ final class E2EScenarioTests: XCTestCase {
             store.cards = cards
             
             // When: 今日の復習カード取得
-            let today = DateUtility.startOfDay(for: Date(), in: DateUtility.jstTimeZone)
+            let today = DateUtility.startOfDay(for: Date())
             let cardsToReview = store.cards.filter { $0.nextDue <= today }
             
             // Then: パフォーマンステストが完了する

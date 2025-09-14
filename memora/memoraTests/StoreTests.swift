@@ -11,10 +11,23 @@ final class StoreTests: XCTestCase {
         super.setUp()
         
         // Create temporary directory for testing
+            store.cards = [Card(
+            question: "Test",
+            answer: "Answer"
+        )]
+        store.settings.morningHour = 10
+        store.reviewLogs = [ReviewLog(
+            cardId: UUID(),
+            previousStep: 0,
+            nextStep: 1,
+            result: true,
+            latencyMs: 3000
+        )]
+        
         tempDirectory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try! FileManager.default.createDirectory(at: tempDirectory, withIntermediateDirectories: true)
         
-        // Mock the Documents directory to use temp directory
+        // Mock the Application Support directory to use temp directory for testing
         store = TestableStore(documentsDirectory: tempDirectory)
     }
     
@@ -41,7 +54,7 @@ final class StoreTests: XCTestCase {
         store.loadData()
         
         XCTAssertTrue(store.cards.isEmpty)
-        XCTAssertEqual(store.settings.spacedRepetitionIntervals, [0, 1, 2, 4, 7, 15, 30])
+        XCTAssertEqual(store.settings.intervals, [0, 1, 2, 4, 7, 15, 30])
         XCTAssertTrue(store.reviewLogs.isEmpty)
     }
     
@@ -52,21 +65,12 @@ final class StoreTests: XCTestCase {
         let card1 = Card(
             question: "Test Question 1",
             answer: "Test Answer 1",
-            stepIndex: 1,
-            nextDue: Date(),
-            reviewCount: 3,
-            lastResult: true,
             tags: ["test", "sample"]
         )
         
         let card2 = Card(
             question: "Test Question 2", 
-            answer: "Test Answer 2",
-            stepIndex: 0,
-            nextDue: Date().addingTimeInterval(86400), // +1 day
-            reviewCount: 0,
-            lastResult: nil,
-            tags: []
+            answer: "Test Answer 2"
         )
         
         store.cards = [card1, card2]
@@ -95,7 +99,7 @@ final class StoreTests: XCTestCase {
     func testSaveAndLoadSettings() {
         // Modify settings
         store.settings.morningHour = 9
-        store.settings.spacedRepetitionIntervals = [0, 1, 3, 7, 14, 30, 90]
+        store.settings.intervals = [0, 1, 3, 7, 14, 30, 90]
         
         // Save settings
         store.saveSettings()
@@ -105,7 +109,7 @@ final class StoreTests: XCTestCase {
         
         // Verify settings were loaded correctly
         XCTAssertEqual(newStore.settings.morningHour, 9)
-        XCTAssertEqual(newStore.settings.spacedRepetitionIntervals, [0, 1, 3, 7, 14, 30, 90])
+        XCTAssertEqual(newStore.settings.intervals, [0, 1, 3, 7, 14, 30, 90])
     }
     
     // MARK: - ReviewLogs Persistence Tests
@@ -118,7 +122,6 @@ final class StoreTests: XCTestCase {
         // Create test review logs
         let log1 = ReviewLog(
             cardId: cardId1,
-            reviewedAt: reviewedAt,
             previousStep: 0,
             nextStep: 1,
             result: true,
@@ -127,7 +130,6 @@ final class StoreTests: XCTestCase {
         
         let log2 = ReviewLog(
             cardId: cardId2,
-            reviewedAt: reviewedAt.addingTimeInterval(-3600), // 1 hour ago
             previousStep: 2,
             nextStep: 0,
             result: false,
@@ -179,7 +181,7 @@ final class StoreTests: XCTestCase {
         
         // Should fallback to default settings
         XCTAssertEqual(newStore.settings.morningHour, 8)
-        XCTAssertEqual(newStore.settings.spacedRepetitionIntervals, [0, 1, 2, 4, 7, 15, 30])
+        XCTAssertEqual(newStore.settings.intervals, [0, 1, 2, 4, 7, 15, 30])
     }
     
     func testLoadReviewLogsWithCorruptedJSON() {
@@ -202,12 +204,7 @@ final class StoreTests: XCTestCase {
         // Add some data
         readOnlyStore.cards = [Card(
             question: "Test", 
-            answer: "Answer", 
-            stepIndex: 0, 
-            nextDue: Date(), 
-            reviewCount: 0, 
-            lastResult: nil, 
-            tags: []
+            answer: "Answer"
         )]
         
         // Save operations should handle errors gracefully (not crash)
@@ -243,17 +240,12 @@ final class StoreTests: XCTestCase {
             let card = Card(
                 question: "Question \(i)",
                 answer: "Answer \(i)", 
-                stepIndex: i % 7,
-                nextDue: Date().addingTimeInterval(Double(i * 86400)), // Days ahead
-                reviewCount: i % 10,
-                lastResult: i % 2 == 0,
                 tags: ["tag\(i % 3)"]
             )
             largeCardSet.append(card)
             
             let log = ReviewLog(
                 cardId: card.id,
-                reviewedAt: Date().addingTimeInterval(Double(-i * 3600)), // Hours ago
                 previousStep: (i - 1) % 7,
                 nextStep: i % 7,
                 result: i % 3 == 0,
@@ -289,16 +281,11 @@ final class StoreTests: XCTestCase {
         store.cards = [Card(
             question: "Concurrent Test", 
             answer: "Answer", 
-            stepIndex: 0, 
-            nextDue: Date(), 
-            reviewCount: 0, 
-            lastResult: nil, 
             tags: []
         )]
         store.settings.morningHour = 10
         store.reviewLogs = [ReviewLog(
             cardId: UUID(),
-            reviewedAt: Date(),
             previousStep: 0,
             nextStep: 1,
             result: true,
@@ -336,17 +323,12 @@ final class StoreTests: XCTestCase {
     
     func testStoreAbstraction() {
         // Test that Store can be easily abstracted for future Core Data migration
-        let storeProtocol: DataStorageProtocol = store
+        let storeProtocol: any DataStorageProtocol = store
         
         // Add test data through protocol
         storeProtocol.cards = [Card(
             question: "Protocol Test", 
-            answer: "Answer", 
-            stepIndex: 0, 
-            nextDue: Date(), 
-            reviewCount: 0, 
-            lastResult: nil, 
-            tags: []
+            answer: "Answer"
         )]
         
         storeProtocol.saveCards()

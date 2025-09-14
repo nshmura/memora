@@ -17,7 +17,29 @@ class Store: ObservableObject {
     }
     
     func getDocumentsDirectory() -> URL {
-        FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileManager = FileManager.default
+        
+        // Use Application Support directory for organized data storage
+        // NOTE: On iOS, ALL app data is deleted when the app is uninstalled
+        // There is no way to persist data beyond app deletion without cloud storage
+        let urls = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+        let appSupportDirectory = urls[0]
+        
+        // Create app-specific directory
+        let memoraDirectory = appSupportDirectory.appendingPathComponent("Memora")
+        
+        // Create directory if it doesn't exist
+        if !fileManager.fileExists(atPath: memoraDirectory.path) {
+            do {
+                try fileManager.createDirectory(at: memoraDirectory, withIntermediateDirectories: true)
+            } catch {
+                print("Failed to create directory: \(error)")
+                // Fallback to documents directory
+                return fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            }
+        }
+        
+        return memoraDirectory
     }
     
     func loadData() {
