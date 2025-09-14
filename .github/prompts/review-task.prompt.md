@@ -40,14 +40,14 @@ You are reviewing the implementation of a spaced repetition iOS app task.
 
 ## Output Format
 
-1. **Task Review**: Which task was implemented
-2. **Compliance Check**: Requirements and design adherence
-3. **Code Quality**: Strengths and areas for improvement
-4. **Test Coverage**: Testing adequacy
-5. **Recommendations**: Next steps or improvements
-6. **Ready for Next Task**: Confirmation to proceed
+1. **Task Summary**: State which task was reviewed
+2. **Status**: If no issues found, respond with "good" only
+3. **Issues Found** (if any): List specific problems requiring attention
+4. **Next Steps**: Ready to proceed confirmation
 
-Provide constructive feedback to ensure high-quality implementation.
+**Rule**: When task implementation is correct with no issues, respond only with "good"
+
+Provide detailed feedback only when improvements are needed.
 
 ## Git Operations
 
