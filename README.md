@@ -2,7 +2,17 @@
 
 忘却曲線に基づく間隔反復学習を行うiOS MVPアプリです。SwiftUIを使用し、ローカルデータ保存とローカル通知に特化したシンプルな設計になっています。
 
-## 📱 アプリ概要
+## � **クイックスタート**
+
+### プロジェクトのセットアップ
+```bash
+git clone https://github.com/nshmura/memora.git
+cd memora
+```
+
+詳細なセットアップ手順は [`SETUP.md`](SETUP.md) を参照してください。
+
+## �📱 アプリ概要
 
 ### 主要機能
 - **4画面構成**: Home / Study / Cards / Settings
