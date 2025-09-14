@@ -48,12 +48,14 @@ struct CardsView: View {
         .sheet(isPresented: $showingAddCard) {
             NavigationStack {
                 AddCardView(viewModel: viewModel)
+                    .id(UUID()) // 毎回新しいViewインスタンスを作成
             }
         }
         .sheet(isPresented: $showingEditCard) {
             if let card = editingCard {
                 NavigationStack {
                     EditCardView(card: card, viewModel: viewModel)
+                        .id(card.id) // カード毎に一意のViewインスタンスを作成
                 }
             }
         }

@@ -29,8 +29,9 @@ struct EditCardView: View {
     }
     
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
+        NavigationView {
+            Form {
+                
                 CardInfoView(card: card)
                 
                 QuestionInputView(question: $question)
@@ -46,7 +47,6 @@ struct EditCardView: View {
                     }
                 )
             }
-            .padding()
         }
         .navigationTitle("カードを編集")
         .navigationBarTitleDisplayMode(.inline)
