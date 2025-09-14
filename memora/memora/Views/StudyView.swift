@@ -116,7 +116,7 @@ struct StudyView: View {
                             
                             TextEditor(text: $userAnswer)
                                 .font(.title3)
-                                .frame(minHeight: 60)
+                                .frame(minHeight: 45)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
