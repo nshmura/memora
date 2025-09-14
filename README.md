@@ -33,7 +33,7 @@ GitHub Copilotのカスタムプロンプトを使用した効率的な開発：
 ```
 .github/
 ├── copilot-instructions.md     # 開発ガイドライン
-└── copilot-prompts/
+└── prompts/
     ├── setup-project.prompt.md        # プロジェクト初期設定
     ├── implement-task.prompt.md       # タスク実装
     ├── review-task.prompt.md          # 実装レビュー
@@ -177,7 +177,7 @@ A: apple
 ## 📚 参考資料
 
 - [Kiro Spec Documentation](.kiro/specs/spaced-repetition-ios-app/)
-- [GitHub Copilot Custom Prompts](.github/copilot-prompts/)
+- [GitHub Copilot Custom Prompts](.github/prompts/)
 - [SwiftUI Best Practices](https://developer.apple.com/documentation/swiftui)
 - [間隔反復学習について](https://ja.wikipedia.org/wiki/間隔反復)
 
