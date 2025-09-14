@@ -48,3 +48,11 @@ You are reviewing the implementation of a spaced repetition iOS app task.
 6. **Ready for Next Task**: Confirmation to proceed
 
 Provide constructive feedback to ensure high-quality implementation.
+
+## Git Operations
+
+After completing the review and confirming the task is ready:
+
+1. **Git Commit**: Commit the completed task with a descriptive message
+2. **Git Push**: Push changes to the remote repository
+3. **Confirmation**: Confirm successful commit and push operations

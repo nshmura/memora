@@ -7,7 +7,7 @@
   - _Requirements: 7.3_
 
 - [ ] 2. 基本データモデルの実装
-  - [ ] 2.1 Cardモデルの作成とテスト
+  - [x] 2.1 Cardモデルの作成とテスト
     - Card構造体をCodable準拠で実装
     - CardのUnit Testを作成（初期化、JSON変換テスト）
     - _Requirements: 1.1, 4.2_
