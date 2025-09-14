@@ -12,12 +12,12 @@
     - CardのUnit Testを作成（初期化、JSON変換テスト）
     - _Requirements: 1.1, 4.2_
 
-  - [ ] 2.2 Settingsモデルの作成とテスト
+  - [x] 2.2 Settingsモデルの作成とテスト
     - Settings構造体をデフォルト値付きで実装
     - SettingsのUnit Testを作成
     - _Requirements: 2.4, 5.2_
 
-  - [ ] 2.3 ReviewLogモデルの作成とテスト
+  - [x] 2.3 ReviewLogモデルの作成とテスト
     - ReviewLog構造体を実装
     - ReviewLogのUnit Testを作成
     - _Requirements: 4.2_
