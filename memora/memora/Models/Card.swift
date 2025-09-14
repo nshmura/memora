@@ -22,7 +22,7 @@ struct Card: Codable, Identifiable {
         self.question = question
         self.answer = answer
         self.stepIndex = 0
-        self.nextDue = Date()
+        self.nextDue = DateUtility.startOfDay(for: Date()) // 今日の開始時刻に設定
         self.reviewCount = 0
         self.lastResult = nil
         self.tags = tags
