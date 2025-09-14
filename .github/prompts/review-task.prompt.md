@@ -53,6 +53,9 @@ Provide constructive feedback to ensure high-quality implementation.
 
 After completing the review and confirming the task is ready:
 
-1. **Git Commit**: Commit the completed task with a descriptive message
-2. **Git Push**: Push changes to the remote repository
-3. **Confirmation**: Confirm successful commit and push operations
+1. **Update tasks.md**: **MANDATORY** - Mark completed task with [x] in `.kiro/specs/spaced-repetition-ios-app/tasks.md`
+2. **Git Commit**: Commit the completed task with a descriptive message
+3. **Git Push**: Push changes to the remote repository
+4. **Confirmation**: Confirm successful commit and push operations
+
+**CRITICAL**: Never skip step 1 - tasks.md must be updated immediately after task completion

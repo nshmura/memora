@@ -13,6 +13,7 @@
 - **タスク実行**: tasks.mdの順序に従って1つずつ実装してください
 - **要件確認**: 各タスクの _Requirements_ セクションで対応する要件を確認してください
 - **レポート**: タスク完了後は簡潔に報告（長文レビューは不要）
+- **CRITICAL**: タスク完了時は必ず `.kiro/specs/spaced-repetition-ios-app/tasks.md` で [x] チェックマークを入れる
 
 ### 2. Architecture Rules
 ```
@@ -223,7 +224,8 @@ if !notificationPermissionGranted {
 4. **Implement**: Write minimal, working code
 5. **Xcode Build**: **MANDATORY** - Run `xcodebuild` to verify compilation
 6. **Test**: Add unit tests for business logic
-7. **Verify**: Ensure task acceptance criteria are met
+7. **Mark Complete**: **MANDATORY** - Update tasks.md with [x] for completed task
+8. **Verify**: Ensure task acceptance criteria are met
 
 #### Mandatory Build Verification
 ```bash
@@ -232,7 +234,7 @@ cd memora/
 xcodebuild -project memora.xcodeproj -scheme memora \
   -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.4' build
 ```
-**Rule**: Never complete a task without successful Xcode build verification
+**Rule**: Never complete a task without successful Xcode build verification AND tasks.md update
 
 #### Commit Messages
 ```
