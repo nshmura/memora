@@ -29,24 +29,21 @@ struct EditCardView: View {
     }
     
     var body: some View {
-        NavigationView {
-            Form {
-                
-                CardInfoView(card: card)
-                
-                QuestionInputView(question: $question)
-                
-                AnswerInputView(answer: $answer)
-                
-                TagInputView(
-                    tagInput: $tagInput,
-                    selectedTags: $selectedTags,
-                    availableTags: viewModel.availableTags,
-                    onAddTag: {
-                        addTag()
-                    }
-                )
-            }
+        Form {
+            CardInfoView(card: card)
+            
+            QuestionInputView(question: $question)
+            
+            AnswerInputView(answer: $answer)
+            
+            TagInputView(
+                tagInput: $tagInput,
+                selectedTags: $selectedTags,
+                availableTags: viewModel.availableTags,
+                onAddTag: {
+                    addTag()
+                }
+            )
         }
         .navigationTitle("カードを編集")
         .navigationBarTitleDisplayMode(.inline)
