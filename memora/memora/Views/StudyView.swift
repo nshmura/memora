@@ -114,9 +114,11 @@ struct StudyView: View {
                                     .padding(.leading, 4)
                             }
                             
-                            TextEditor(text: $userAnswer)
+                            TextField("", text: $userAnswer, axis: .vertical)
                                 .font(.title3)
-                                .frame(minHeight: 45)
+                                .textFieldStyle(.plain)
+                                .lineLimit(3...6)
+                                .padding(8)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
