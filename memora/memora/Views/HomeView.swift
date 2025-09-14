@@ -24,11 +24,12 @@ struct HomeView: View {
                 Text("🔥 連続日数: \(viewModel.consecutiveDays)日")
                     .font(.headline)
                 
-                Button("学習を始める") {
-                    // TODO: Navigate to StudyView
+                NavigationLink(destination: StudyView()) {
+                    Text("学習を始める")
+                        .frame(maxWidth: .infinity)
+                        .padding()
                 }
                 .buttonStyle(.borderedProminent)
-                .padding()
                 .disabled(viewModel.todayReviewCount == 0)
                 
                 Text("次回通知: \(viewModel.nextNotificationTime)")
