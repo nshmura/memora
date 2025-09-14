@@ -104,14 +104,14 @@ class DateUtility {
     
     // MARK: - Date Creation Helpers
     
-    /// Create a JST date with specific components
+    /// Create a JST date from components
     /// - Parameters:
-    ///   - year: Year component
-    ///   - month: Month component (1-12)
-    ///   - day: Day component
-    ///   - hour: Hour component (0-23), defaults to 0
-    ///   - minute: Minute component (0-59), defaults to 0
-    ///   - second: Second component (0-59), defaults to 0
+    ///   - year: Year
+    ///   - month: Month (1-12)
+    ///   - day: Day (1-31)
+    ///   - hour: Hour (0-23)
+    ///   - minute: Minute (0-59)
+    ///   - second: Second (0-59)
     /// - Returns: Date created in JST timezone, or nil if invalid components
     static func createJSTDate(year: Int, month: Int, day: Int, hour: Int = 0, minute: Int = 0, second: Int = 0) -> Date? {
         var components = DateComponents()
@@ -123,7 +123,24 @@ class DateUtility {
         components.minute = minute
         components.second = second
         
-        return jstCalendar.date(from: components)
+        guard let date = jstCalendar.date(from: components) else {
+            return nil
+        }
+        
+        // Validate that the created date has the same components
+        // If Calendar auto-corrected invalid date components, reject it
+        let resultComponents = jstCalendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
+        
+        if resultComponents.year != year ||
+           resultComponents.month != month ||
+           resultComponents.day != day ||
+           resultComponents.hour != hour ||
+           resultComponents.minute != minute ||
+           resultComponents.second != second {
+            return nil // Invalid date components were auto-corrected
+        }
+        
+        return date
     }
     
     // MARK: - Formatting Helpers
