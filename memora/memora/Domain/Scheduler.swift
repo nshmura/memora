@@ -29,17 +29,12 @@ class Scheduler {
         let intervals = [0, 1, 2, 4, 7, 15, 30]
         let dayOffset = stepIndex < intervals.count ? intervals[stepIndex] : intervals.last!
         
-        let jstTimeZone = TimeZone(identifier: "Asia/Tokyo")!
-        var calendar = Calendar.current
-        calendar.timeZone = jstTimeZone
-        
-        let startOfDay = calendar.startOfDay(for: baseDate)
-        return calendar.date(byAdding: .day, value: dayOffset, to: startOfDay) ?? startOfDay
+        // Use DateUtility for proper JST handling
+        return DateUtility.addDays(to: baseDate, days: dayOffset)
     }
     
     static func startOfDay(for date: Date, in timeZone: TimeZone = TimeZone(identifier: "Asia/Tokyo")!) -> Date {
-        var calendar = Calendar.current
-        calendar.timeZone = timeZone
-        return calendar.startOfDay(for: date)
+        // Delegate to DateUtility for consistent JST handling
+        return DateUtility.startOfDay(for: date)
     }
 }
