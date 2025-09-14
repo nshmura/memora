@@ -220,8 +220,18 @@ if !notificationPermissionGranted {
 2. **Review Requirements**: Check corresponding requirements in requirements.md
 3. **Check Design**: Reference architecture and data models in design.md
 4. **Implement**: Write minimal, working code
-5. **Test**: Add unit tests for business logic
-6. **Verify**: Ensure task acceptance criteria are met
+5. **Xcode Build**: **MANDATORY** - Run `xcodebuild` to verify compilation
+6. **Test**: Add unit tests for business logic
+7. **Verify**: Ensure task acceptance criteria are met
+
+#### Mandatory Build Verification
+```bash
+# Must run after every task implementation
+cd memora/
+xcodebuild -project memora.xcodeproj -scheme memora \
+  -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.4' build
+```
+**Rule**: Never complete a task without successful Xcode build verification
 
 #### Commit Messages
 ```
