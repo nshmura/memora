@@ -50,19 +50,19 @@ GitHub Copilotのカスタムプロンプトを使用した効率的な開発：
 ### 2. プロジェクト初期設定
 ```bash
 # GitHub Copilot Chatで実行
-@workspace /setup-project
+/setup-project
 ```
 
 ### 3. 段階的実装（12タスク）
 ```bash
 # 次のタスクを実装
-@workspace /implement-task
+/implement-task
 
 # 実装内容をレビュー
-@workspace /review-task
+/review-task
 
 # 問題があればデバッグ
-@workspace /debug-task
+/debug-task
 ```
 
 ### 4. 実装順序
