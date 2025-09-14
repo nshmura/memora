@@ -12,29 +12,29 @@ struct ContentView: View {
 
     var body: some View {
         TabView {
-            HomeView()
-                .tabItem {
-                    Image(systemName: "house")
-                    Text("Home")
-                }
+            NavigationStack {
+                HomeView()
+            }
+            .tabItem {
+                Image(systemName: "house")
+                Text("ホーム")
+            }
             
-            StudyView()
-                .tabItem {
-                    Image(systemName: "brain.head.profile")
-                    Text("Study")
-                }
+            NavigationStack {
+                CardsView()
+            }
+            .tabItem {
+                Image(systemName: "rectangle.stack")
+                Text("カード")
+            }
             
-            CardsView()
-                .tabItem {
-                    Image(systemName: "rectangle.stack")
-                    Text("Cards")
-                }
-            
-            SettingsView()
-                .tabItem {
-                    Image(systemName: "gearshape")
-                    Text("Settings")
-                }
+            NavigationStack {
+                SettingsView()
+            }
+            .tabItem {
+                Image(systemName: "gearshape")
+                Text("設定")
+            }
         }
     }
 }

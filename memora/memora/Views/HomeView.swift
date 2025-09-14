@@ -12,17 +12,16 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 20) {
-                Text("今日の復習")
-                    .font(.title2)
-                
-                Text("\(viewModel.todayReviewCount)枚")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                
-                Text("🔥 連続日数: \(viewModel.consecutiveDays)日")
-                    .font(.headline)
+        VStack(spacing: 20) {
+            Text("今日の復習")
+                .font(.title2)
+            
+            Text("\(viewModel.todayReviewCount)枚")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+            
+            Text("🔥 連続日数: \(viewModel.consecutiveDays)日")
+                .font(.headline)
                 
                 NavigationLink(destination: StudyView()) {
                     Text("学習を始める")
@@ -32,18 +31,29 @@ struct HomeView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(viewModel.todayReviewCount == 0)
                 
+                // Retry today's study button
+                NavigationLink(destination: StudyView(retryMode: true)) {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                        Text("今日の学習をやり直す")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                }
+                .buttonStyle(.bordered)
+                .disabled(viewModel.completedTodayCount == 0)
+                
                 Text("次回通知: \(viewModel.nextNotificationTime)")
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
-                Spacer()
-            }
-            .navigationTitle("Memora")
-            .padding()
-            .onAppear {
-                viewModel.updateStore(store)
-                viewModel.refresh()
-            }
+            Spacer()
+        }
+        .navigationTitle("Memora")
+        .padding()
+        .onAppear {
+            viewModel.updateStore(store)
+            viewModel.refresh()
         }
     }
 }

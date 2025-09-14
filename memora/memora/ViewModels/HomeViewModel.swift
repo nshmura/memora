@@ -10,6 +10,7 @@ import Foundation
 @MainActor
 class HomeViewModel: ObservableObject {
     @Published var todayReviewCount: Int = 0
+    @Published var completedTodayCount: Int = 0
     @Published var consecutiveDays: Int = 0
     @Published var nextNotificationTime: String = ""
     
@@ -18,6 +19,7 @@ class HomeViewModel: ObservableObject {
     init(store: Store = Store()) {
         self.store = store
         updateTodayReviewCount()
+        updateCompletedTodayCount()
         updateConsecutiveDays()
         updateNextNotificationTime()
     }
@@ -37,6 +39,21 @@ class HomeViewModel: ObservableObject {
         }
         
         todayReviewCount = todayCards.count
+    }
+    
+    // MARK: - 今日完了した復習枚数計算
+    
+    private func updateCompletedTodayCount() {
+        let today = DateUtility.startOfDay(for: Date())
+        let tomorrow = DateUtility.addDays(to: today, days: 1)
+        
+        // 今日のレビューログから完了したカード数を取得
+        let todayCompletedCards = store.reviewLogs.filter { log in
+            let logDate = log.reviewedAt
+            return logDate >= today && logDate < tomorrow
+        }
+        
+        completedTodayCount = Set(todayCompletedCards.map { $0.cardId }).count
     }
     
     // MARK: - 連続学習日数計算
@@ -110,6 +127,7 @@ class HomeViewModel: ObservableObject {
     
     func refresh() {
         updateTodayReviewCount()
+        updateCompletedTodayCount()
         updateConsecutiveDays()
         updateNextNotificationTime()
     }

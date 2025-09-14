@@ -17,8 +17,7 @@ struct SettingsView: View {
     }
     
     var body: some View {
-        NavigationView {
-            List {
+        List {
                 Section {
                     // Notification Time Setting
                     HStack {
@@ -74,8 +73,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            .navigationTitle("設定")
-        }
+        .navigationTitle("設定")
         .onAppear {
             // Update ViewModel to use environment Store
             settingsViewModel.updateStore(store)

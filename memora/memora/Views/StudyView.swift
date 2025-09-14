@@ -13,36 +13,46 @@ struct StudyView: View {
     @State private var showingAnswer = false
     @State private var cardOffset: CGFloat = 0
     @State private var showingCompletion = false
+    @State private var userAnswer = ""
+    @State private var submittedAnswer = false
+    @State private var isAnswerCorrect = false
+    
+    let retryMode: Bool
+    
+    init(retryMode: Bool = false) {
+        self.retryMode = retryMode
+    }
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
-                if viewModel.hasCardsToStudy {
-                    studyContent
-                } else {
-                    emptyState
-                }
+        VStack(spacing: 0) {
+            if viewModel.hasCardsToStudy {
+                studyContent
+            } else {
+                emptyState
             }
-            .navigationTitle("Study")
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear {
-                viewModel.updateStore(store)
+        }
+        .navigationTitle(retryMode ? "復習やり直し" : "Study")
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear {
+            viewModel.updateStore(store)
+            if retryMode {
+                viewModel.loadTodayCompletedCards()
             }
-            .alert("学習完了！", isPresented: $showingCompletion) {
-                Button("OK") {
-                    Task {
-                        let notificationPlanner = NotificationPlanner()
-                        let granted = await notificationPlanner.requestAuthorization()
-                        if granted {
-                            print("Notification permission granted")
-                        } else {
-                            print("Notification permission denied")
-                        }
+        }
+        .alert("学習完了！", isPresented: $showingCompletion) {
+            Button("OK") {
+                Task {
+                    let notificationPlanner = NotificationPlanner()
+                    let granted = await notificationPlanner.requestAuthorization()
+                    if granted {
+                        print("Notification permission granted")
+                    } else {
+                        print("Notification permission denied")
                     }
                 }
-            } message: {
-                Text("今日の復習が完了しました。お疲れ様でした！")
             }
+        } message: {
+            Text("今日の復習が完了しました。お疲れ様でした！")
         }
     }
     
@@ -101,8 +111,54 @@ struct StudyView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(12)
                 
-                // Show Answer button or Answer content
-                if showingAnswer {
+                // Answer input field (only show if not submitted and not showing "don't know")
+                if !submittedAnswer && !showingAnswer {
+                    VStack(spacing: 12) {
+                        TextField("答えを入力する", text: $userAnswer)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .font(.title3)
+                        
+                        HStack(spacing: 12) {
+                            // Submit Answer button
+                            Button(action: {
+                                submitAnswer()
+                            }) {
+                                HStack {
+                                    Image(systemName: "arrow.forward.circle")
+                                    Text("回答する")
+                                }
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(userAnswer.isEmpty ? Color.gray : Color.blue)
+                                .cornerRadius(12)
+                            }
+                            .disabled(userAnswer.isEmpty)
+                            
+                            // Don't Know button
+                            Button(action: {
+                                showDontKnow()
+                            }) {
+                                HStack {
+                                    Image(systemName: "questionmark.circle")
+                                    Text("🤔 分からない")
+                                }
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.orange)
+                                .cornerRadius(12)
+                            }
+                        }
+                    }
+                }
+                
+                // Show answer after submission or "don't know"
+                if submittedAnswer || showingAnswer {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("正解:")
                             .font(.subheadline)
@@ -119,16 +175,54 @@ struct StudyView: View {
                     .background(Color.green.opacity(0.1))
                     .cornerRadius(12)
                     .transition(.opacity.combined(with: .scale))
-                } else {
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            showingAnswer = true
-                            viewModel.showAnswer()
+                    
+                    // Show result feedback only for submitted answers (not for "don't know")
+                    if submittedAnswer {
+                        VStack(spacing: 8) {
+                            if isAnswerCorrect {
+                                HStack {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                        .font(.title2)
+                                    Text("✅ 正解")
+                                        .font(.title3)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.green)
+                                }
+                            } else {
+                                HStack {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.red)
+                                        .font(.title2)
+                                    Text("❌ 不正解")
+                                        .font(.title3)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.red)
+                                }
+                            }
                         }
+                        .padding()
+                        .background(isAnswerCorrect ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
+                        .cornerRadius(12)
+                        .transition(.opacity.combined(with: .scale))
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 20)
+    }
+    
+    private var actionButtons: some View {
+        VStack(spacing: 12) {
+            if submittedAnswer || showingAnswer {
+                HStack(spacing: 12) {
+                    // Next Card button - always show when answer is revealed
+                    Button(action: {
+                        nextCard()
                     }) {
                         HStack {
-                            Image(systemName: "eye")
-                            Text("答えを見る")
+                            Text("次のカード")
+                            Image(systemName: "arrow.right.circle")
                         }
                         .font(.title3)
                         .fontWeight(.medium)
@@ -139,81 +233,9 @@ struct StudyView: View {
                         .cornerRadius(12)
                     }
                 }
-            }
-        }
-        .padding(.horizontal, 20)
-    }
-    
-    private var actionButtons: some View {
-        VStack(spacing: 12) {
-            if showingAnswer {
-                HStack(spacing: 12) {
-                    // Don't Know button
-                    Button(action: {
-                        answerCard(isCorrect: false)
-                    }) {
-                        VStack(spacing: 4) {
-                            Image(systemName: "questionmark.circle")
-                                .font(.title2)
-                            Text("分からない")
-                                .font(.caption)
-                        }
-                        .foregroundColor(.orange)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.orange.opacity(0.1))
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.orange, lineWidth: 1)
-                        )
-                    }
-                    
-                    // Incorrect button
-                    Button(action: {
-                        answerCard(isCorrect: false)
-                    }) {
-                        VStack(spacing: 4) {
-                            Image(systemName: "xmark.circle")
-                                .font(.title2)
-                            Text("不正解")
-                                .font(.caption)
-                        }
-                        .foregroundColor(.red)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.red.opacity(0.1))
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.red, lineWidth: 1)
-                        )
-                    }
-                    
-                    // Correct button
-                    Button(action: {
-                        answerCard(isCorrect: true)
-                    }) {
-                        VStack(spacing: 4) {
-                            Image(systemName: "checkmark.circle")
-                                .font(.title2)
-                            Text("正解")
-                                .font(.caption)
-                        }
-                        .foregroundColor(.green)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
-                        .background(Color.green.opacity(0.1))
-                        .cornerRadius(12)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.green, lineWidth: 1)
-                        )
-                    }
-                }
                 .padding(.horizontal, 20)
             } else {
-                Text("まずは答えを確認してください")
+                Text("答えを入力して回答してください")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 20)
@@ -223,15 +245,15 @@ struct StudyView: View {
     
     private var emptyState: some View {
         VStack(spacing: 20) {
-            Image(systemName: "checkmark.circle.fill")
+            Image(systemName: retryMode ? "clock.arrow.circlepath" : "checkmark.circle.fill")
                 .font(.system(size: 60))
-                .foregroundColor(.green)
+                .foregroundColor(retryMode ? .orange : .green)
             
-            Text("今日の復習は完了しました！")
+            Text(retryMode ? "今日やり直す復習はありません" : "今日の復習は完了しました！")
                 .font(.title2)
                 .fontWeight(.medium)
             
-            Text("お疲れ様でした。明日も頑張りましょう。")
+            Text(retryMode ? "まずは通常の学習を完了してください。" : "お疲れ様でした。明日も頑張りましょう。")
                 .font(.body)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -241,7 +263,41 @@ struct StudyView: View {
         .padding()
     }
     
-    private func answerCard(isCorrect: Bool) {
+    private func submitAnswer() {
+        guard !userAnswer.isEmpty, let currentCard = viewModel.currentCard else { return }
+        
+        withAnimation(.easeInOut(duration: 0.3)) {
+            submittedAnswer = true
+            showingAnswer = true
+            
+            // Simple string comparison (case-insensitive, trimmed)
+            let userAnswerCleaned = userAnswer.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            let correctAnswerCleaned = currentCard.answer.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+            isAnswerCorrect = userAnswerCleaned == correctAnswerCleaned
+            
+            viewModel.showAnswer()
+        }
+    }
+    
+    private func showDontKnow() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            showingAnswer = true
+            submittedAnswer = false // Don't show correct/incorrect for "don't know"
+            viewModel.showAnswer()
+        }
+    }
+    
+    private func nextCard() {
+        // Determine the result based on the action taken
+        let isCorrect: Bool
+        if submittedAnswer {
+            // User submitted an answer, use the correctness result
+            isCorrect = isAnswerCorrect
+        } else {
+            // User pressed "don't know", count as incorrect
+            isCorrect = false
+        }
+        
         // Add slide animation
         withAnimation(.easeInOut(duration: 0.3)) {
             cardOffset = isCorrect ? 300 : -300
@@ -254,6 +310,9 @@ struct StudyView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             cardOffset = 0
             showingAnswer = false
+            submittedAnswer = false
+            userAnswer = ""
+            isAnswerCorrect = false
             
             // Check if study session is complete
             if !viewModel.hasCardsToStudy {
@@ -265,5 +324,10 @@ struct StudyView: View {
 
 #Preview {
     StudyView()
+        .environmentObject(Store())
+}
+
+#Preview("Retry Mode") {
+    StudyView(retryMode: true)
         .environmentObject(Store())
 }

@@ -15,8 +15,7 @@ struct CardsView: View {
     @State private var editingCard: Card?
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 if !viewModel.cards.isEmpty {
                     SearchAndFilterView(viewModel: viewModel)
                 }
@@ -33,30 +32,29 @@ struct CardsView: View {
                         onDelete: deleteCards
                     )
                 }
-            }
-            .navigationTitle("カード")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        showingAddCard = true
-                    }) {
-                        Image(systemName: "plus")
-                            .accessibilityLabel("新しいカードを追加")
-                    }
+        }
+        .navigationTitle("カード")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showingAddCard = true
+                }) {
+                    Image(systemName: "plus")
+                        .accessibilityLabel("新しいカードを追加")
                 }
             }
-            .sheet(isPresented: $showingAddCard) {
-                AddCardView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showingAddCard) {
+            AddCardView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showingEditCard) {
+            if let card = editingCard {
+                EditCardView(card: card, viewModel: viewModel)
             }
-            .sheet(isPresented: $showingEditCard) {
-                if let card = editingCard {
-                    EditCardView(card: card, viewModel: viewModel)
-                }
-            }
-            .onAppear {
-                viewModel.updateStore(store)
-            }
+        }
+        .onAppear {
+            viewModel.updateStore(store)
         }
     }
     

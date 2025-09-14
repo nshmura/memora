@@ -53,6 +53,40 @@ class StudyViewModel: ObservableObject {
         }
     }
     
+    // MARK: - 今日完了したカードを再度学習するためのロジック
+    
+    func loadTodayCompletedCards() {
+        let today = DateUtility.startOfDay(for: Date())
+        let tomorrow = DateUtility.addDays(to: today, days: 1)
+        
+        // 今日のレビューログから完了したカードIDを取得
+        let todayCompletedCardIds = store.reviewLogs.filter { log in
+            let logDate = log.reviewedAt
+            return logDate >= today && logDate < tomorrow
+        }.map { $0.cardId }
+        
+        // 重複を排除してユニークなカードIDを取得
+        let uniqueCompletedCardIds = Set(todayCompletedCardIds)
+        
+        // 完了したカードを取得
+        dueCards = store.cards.filter { card in
+            uniqueCompletedCardIds.contains(card.id)
+        }
+        
+        totalCount = dueCards.count
+        currentIndex = 0
+        isStudyCompleted = false
+        showingAnswer = false
+        
+        // Set current card
+        if !dueCards.isEmpty {
+            currentCard = dueCards[0]
+            studyStartTime = Date()
+        } else {
+            currentCard = nil
+        }
+    }
+    
     // MARK: - 学習進捗管理
     
     func showAnswer() {
