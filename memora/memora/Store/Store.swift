@@ -91,4 +91,11 @@ class Store: ObservableObject {
             print("Failed to save review logs: \(error)")
         }
     }
+    
+    // MARK: - Update Methods
+    
+    func updateSettings(_ newSettings: Settings) {
+        settings = newSettings
+        saveSettings()
+    }
 }

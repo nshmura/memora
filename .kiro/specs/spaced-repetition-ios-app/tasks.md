@@ -90,7 +90,7 @@
     - _Requirements: 2.3, 6.1, 6.2_
 
 - [ ] 8. SettingsView画面の実装
-  - [ ] 8.1 SettingsViewModelの作成
+  - [x] 8.1 SettingsViewModelの作成
     - 通知時刻設定の管理
     - 設定変更時の通知再編成
     - _Requirements: 2.4_
