@@ -89,13 +89,13 @@
     - 基本的なUI操作性
     - _Requirements: 2.3, 6.1, 6.2_
 
-- [ ] 8. SettingsView画面の実装
+- [x] 8. SettingsView画面の実装
   - [x] 8.1 SettingsViewModelの作成
     - 通知時刻設定の管理
     - 設定変更時の通知再編成
     - _Requirements: 2.4_
 
-  - [ ] 8.2 SettingsViewのUI実装
+  - [x] 8.2 SettingsViewのUI実装
     - 通知時刻のPicker
     - 間隔テーブル表示（編集不可）
     - 設定変更の即座反映

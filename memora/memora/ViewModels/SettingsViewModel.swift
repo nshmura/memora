@@ -65,6 +65,13 @@ class SettingsViewModel: ObservableObject {
         }
     }
     
+    func checkNotificationPermissions() async {
+        let current = await UNUserNotificationCenter.current().notificationSettings()
+        await MainActor.run {
+            self.notificationPermissionStatus = current.authorizationStatus
+        }
+    }
+    
     func requestNotificationPermission() async -> Bool {
         do {
             let granted = try await UNUserNotificationCenter.current()
