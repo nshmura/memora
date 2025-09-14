@@ -12,13 +12,21 @@ struct EditCardView: View {
     let card: Card
     let viewModel: CardsViewModel
     
-    @State private var question = ""
-    @State private var answer = ""
+    @State private var question: String
+    @State private var answer: String
     @State private var tagInput = ""
-    @State private var selectedTags: Set<String> = []
+    @State private var selectedTags: Set<String>
     @State private var showingAlert = false
     @State private var alertMessage = ""
     @State private var showingDeleteConfirmation = false
+    
+    init(card: Card, viewModel: CardsViewModel) {
+        self.card = card
+        self.viewModel = viewModel
+        self._question = State(initialValue: card.question)
+        self._answer = State(initialValue: card.answer)
+        self._selectedTags = State(initialValue: Set(card.tags))
+    }
     
     var body: some View {
         ScrollView {
@@ -70,20 +78,11 @@ struct EditCardView: View {
         } message: {
             Text("この操作は取り消せません。")
         }
-        .onAppear {
-            loadCardData()
-        }
     }
     
     private var isFormValid: Bool {
         !question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
         !answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-    
-    private func loadCardData() {
-        question = card.question
-        answer = card.answer
-        selectedTags = Set(card.tags)
     }
     
     private func addTag() {
