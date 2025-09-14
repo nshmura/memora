@@ -8,7 +8,7 @@ Memoraアプリは**Documentsディレクトリ**にデータを保存し、iPho
 
 ## データ保存場所
 ```
-Documents/memora/data/
+Documents/data/
 ├── cards.json      # 学習カードデータ
 ├── settings.json   # アプリ設定
 └── reviewLogs.json # 学習ログ
@@ -21,7 +21,7 @@ Documents/memora/data/
 2. **下部の「ブラウズ」をタップ**
 3. **「このiPhone内」をタップ**
 4. **「memora」フォルダを探す**
-5. **「data」サブフォルダを開く**
+5. **「data」フォルダを開く**
 6. **JSONファイルが表示されます**
 
 ## 利点・機能

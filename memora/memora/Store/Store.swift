@@ -22,13 +22,13 @@ class Store: ObservableObject {
         // Use Documents directory which is accessible from Files app
         // This is available without any special capabilities
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let memoraDirectory = documentsDirectory.appendingPathComponent("memora").appendingPathComponent("data")
+        let dataDirectory = documentsDirectory.appendingPathComponent("data")
         
         // Create directory if it doesn't exist
-        if !fileManager.fileExists(atPath: memoraDirectory.path) {
+        if !fileManager.fileExists(atPath: dataDirectory.path) {
             do {
-                try fileManager.createDirectory(at: memoraDirectory, withIntermediateDirectories: true)
-                print("Created documents directory: \(memoraDirectory.path)")
+                try fileManager.createDirectory(at: dataDirectory, withIntermediateDirectories: true)
+                print("Created documents directory: \(dataDirectory.path)")
                 
                 // Try to migrate data from old locations
                 migrateFromOldLocations()
@@ -40,8 +40,8 @@ class Store: ObservableObject {
             }
         }
         
-        print("Using Documents directory: \(memoraDirectory.path)")
-        return memoraDirectory
+        print("Using Documents directory: \(dataDirectory.path)")
+        return dataDirectory
     }
     
     func loadData() {
@@ -120,14 +120,16 @@ class Store: ObservableObject {
     
     private func migrateFromOldLocations() {
         let fileManager = FileManager.default
-        let newMemoraDirectory = getDocumentsDirectory()
+        let newDataDirectory = getDocumentsDirectory()
         let filesToMigrate = ["cards.json", "settings.json", "reviewLogs.json"]
         
         // Migration locations to check (in order of preference)
         let migrationSources: [(path: URL, description: String)] = [
-            // 1. Documents/Memora/ (previous location)
+            // 1. Documents/memora/data/ (previous location)
+            (fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("memora").appendingPathComponent("data"), "Documents/memora/data"),
+            // 2. Documents/Memora/ (earlier location)
             (fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Memora"), "Documents/Memora"),
-            // 2. Application Support/Memora/ (original location)
+            // 3. Application Support/Memora/ (original location)
             (fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Memora"), "Application Support/Memora")
         ]
         
@@ -144,7 +146,7 @@ class Store: ObservableObject {
             var hasDataToMigrate = false
             for filename in filesToMigrate {
                 let oldFileURL = sourcePath.appendingPathComponent(filename)
-                let newFileURL = newMemoraDirectory.appendingPathComponent(filename)
+                let newFileURL = newDataDirectory.appendingPathComponent(filename)
                 
                 // Skip if old file doesn't exist
                 guard fileManager.fileExists(atPath: oldFileURL.path) else {
