@@ -64,7 +64,7 @@
     - _Requirements: 2.1, 6.1, 6.2_
 
 - [ ] 6. StudyView画面の実装
-  - [ ] 6.1 StudyViewModelの作成
+  - [x] 6.1 StudyViewModelの作成
     - 今日復習すべきカード取得ロジック
     - 正誤判定とScheduler連携ロジック
     - 学習進捗管理
