@@ -76,14 +76,14 @@
     - 学習完了時の通知権限要求
     - _Requirements: 2.2, 3.1_
 
-- [ ] 7. CardsView画面の実装
+- [x] 7. CardsView画面の実装
   - [x] 7.1 CardsViewModelの作成
     - カード一覧表示ロジック
     - カード追加・編集・削除ロジック
     - 検索・フィルタ機能
     - _Requirements: 2.3_
 
-  - [ ] 7.2 CardsViewのUI実装
+  - [x] 7.2 CardsViewのUI実装
     - カード一覧表示とリスト操作
     - カード追加・編集フォーム
     - 基本的なUI操作性
