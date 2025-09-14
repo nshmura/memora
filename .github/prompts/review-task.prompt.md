@@ -41,9 +41,8 @@ You are reviewing the implementation of a spaced repetition iOS app task.
 ## Output Format
 
 1. **Task Summary**: State which task was reviewed
-2. **Status**: If no issues found, respond with "good" only
-3. **Issues Found** (if any): List specific problems requiring attention
-4. **Next Steps**: Ready to proceed confirmation
+2. **Issues Found** (if any): List specific problems requiring attention
+3. **Next Steps**: Ready to proceed confirmation
 
 **Rule**: When task implementation is correct with no issues, respond only with "good"
 

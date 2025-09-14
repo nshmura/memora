@@ -19,14 +19,13 @@
 
 ### Requirement 2
 
-**User Story:** As a 学習者, I want 4つの主要画面（Home/Study/Cards/Settings）でアプリを操作できるように, so that 直感的にアプリを使用できる
+**User Story:** As a 学習者, I want 3つの主要画面（Home/Cards/Settings）でアプリを操作できるように, so that 直感的にアプリを使用できる
 
 #### Acceptance Criteria
 
 1. WHEN ユーザーがHomeを開く THEN システム SHALL 今日の復習枚数と連続学習日数を表示する
-2. WHEN ユーザーがStudyを開く THEN システム SHALL 問題→回答→正誤判定の流れを提供する
-3. WHEN ユーザーがCardsを開く THEN システム SHALL カード一覧と追加・編集機能を提供する
-4. WHEN ユーザーがSettingsを開く THEN システム SHALL 通知時刻設定を提供する
+2. WHEN ユーザーがCardsを開く THEN システム SHALL カード一覧と追加・編集機能を提供する
+3. WHEN ユーザーがSettingsを開く THEN システム SHALL 通知時刻設定を提供する
 
 ### Requirement 3
 
