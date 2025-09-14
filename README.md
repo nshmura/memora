@@ -33,6 +33,32 @@ xcodebuild clean build -target memora
 2. Homeから回答（正解→次間隔へ / 不正解→最初に戻る・翌日）
 3. Home で今日の復習残数と連続日数を確認
 
+## スクリーンショット
+
+<table>
+  <tr>
+    <td align="center" width="33%"><strong>Home</strong><br/>
+      <img src="docs/images/home.png" alt="Home 画面" width="200">
+    </td>
+    <td align="center" width="33%"><strong>学習（問題）</strong><br/>
+      <img src="docs/images/study1.png" alt="学習 問題画面" width="200">
+    </td>
+    <td align="center" width="33%"><strong>学習（回答後）</strong><br/>
+      <img src="docs/images/study2.png" alt="学習 回答後画面" width="200">
+    </td>
+  </tr>
+  <tr>
+    <td align="center"><strong>Cards</strong><br/>
+      <img src="docs/images/card.png" alt="カード一覧/追加" width="200">
+    </td>
+    <td align="center"><strong>Settings</strong><br/>
+      <img src="docs/images/settings.png" alt="設定画面" width="200">
+    </td>
+    <td align="center">&nbsp;</td>
+  </tr>
+</table>
+
+
 ## データ保存場所
 ファイルアプリ: `このiPhone内/memora/data/`
 - cards.json
