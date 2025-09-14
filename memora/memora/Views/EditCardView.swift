@@ -21,7 +21,7 @@ struct EditCardView: View {
     @State private var showingDeleteConfirmation = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     CardInfoView(card: card)
