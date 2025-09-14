@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. プロジェクト初期設定とフォルダ構成
+- [x] 1. プロジェクト初期設定とフォルダ構成
   - Xcodeプロジェクト作成（SpacedStudy、iOS 16.0+、SwiftUI）
   - フォルダ構成作成：App/Views/Domain/Models/Store/Tests
   - Info.plistに通知権限設定追加
