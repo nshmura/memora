@@ -39,7 +39,7 @@
     - 日付境界処理のUnit Test作成
     - _Requirements: 5.1, 5.2_
 
-  - [ ] 4.2 Schedulerクラスの実装
+  - [x] 4.2 Schedulerクラスの実装
     - gradeCard、calculateNextDue、startOfDayメソッド実装
     - 間隔テーブル[0,1,2,4,7,15,30]を使用した次回復習日計算
     - _Requirements: 1.3, 1.4, 5.1_
