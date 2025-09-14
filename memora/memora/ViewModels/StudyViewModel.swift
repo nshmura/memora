@@ -117,22 +117,22 @@ class StudyViewModel: ObservableObject {
         store.saveCards()
         store.saveReviewLogs()
         
-        // Update current card with graded version
-        currentCard = gradedCard
-        
-        // Update due cards list to remove this card
+        // Remove current card from due cards list
         if let dueIndex = dueCards.firstIndex(where: { $0.id == card.id }) {
             dueCards.remove(at: dueIndex)
             totalCount = dueCards.count
             
-            // Adjust current index if necessary
+            // Adjust current index - don't increment since we removed the current card
             if currentIndex >= dueCards.count {
-                currentIndex = max(0, dueCards.count - 1)
+                // No more cards, study is completed
+                isStudyCompleted = true
+                currentCard = nil
+            } else {
+                // Move to the card at the current index (which is now the next card after removal)
+                currentCard = dueCards[currentIndex]
+                showingAnswer = false
             }
         }
-        
-        // Move to next card or complete study
-        moveToNextCard()
     }
     
     // MARK: - Study Session Management

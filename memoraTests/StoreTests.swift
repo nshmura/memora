@@ -32,7 +32,7 @@ final class StoreTests: XCTestCase {
     func testInitialization() {
         // Store should initialize with default values when no files exist
         XCTAssertTrue(store.cards.isEmpty)
-        XCTAssertEqual(store.settings.morningNotificationTime, 8)
+        XCTAssertEqual(store.settings.morningHour, 8)
         XCTAssertTrue(store.reviewLogs.isEmpty)
     }
     
@@ -94,7 +94,7 @@ final class StoreTests: XCTestCase {
     
     func testSaveAndLoadSettings() {
         // Modify settings
-        store.settings.morningNotificationTime = 9
+        store.settings.morningHour = 9
         store.settings.spacedRepetitionIntervals = [0, 1, 3, 7, 14, 30, 90]
         
         // Save settings
@@ -104,7 +104,7 @@ final class StoreTests: XCTestCase {
         let newStore = TestableStore(documentsDirectory: tempDirectory)
         
         // Verify settings were loaded correctly
-        XCTAssertEqual(newStore.settings.morningNotificationTime, 9)
+        XCTAssertEqual(newStore.settings.morningHour, 9)
         XCTAssertEqual(newStore.settings.spacedRepetitionIntervals, [0, 1, 3, 7, 14, 30, 90])
     }
     
@@ -178,7 +178,7 @@ final class StoreTests: XCTestCase {
         let newStore = TestableStore(documentsDirectory: tempDirectory)
         
         // Should fallback to default settings
-        XCTAssertEqual(newStore.settings.morningNotificationTime, 8)
+        XCTAssertEqual(newStore.settings.morningHour, 8)
         XCTAssertEqual(newStore.settings.spacedRepetitionIntervals, [0, 1, 2, 4, 7, 15, 30])
     }
     
@@ -295,7 +295,7 @@ final class StoreTests: XCTestCase {
             lastResult: nil, 
             tags: []
         )]
-        store.settings.morningNotificationTime = 10
+        store.settings.morningHour = 10
         store.reviewLogs = [ReviewLog(
             cardId: UUID(),
             reviewedAt: Date(),
@@ -328,7 +328,7 @@ final class StoreTests: XCTestCase {
         
         XCTAssertEqual(newStore.cards.count, 1)
         XCTAssertEqual(newStore.cards[0].question, "Concurrent Test")
-        XCTAssertEqual(newStore.settings.morningNotificationTime, 10)
+        XCTAssertEqual(newStore.settings.morningHour, 10)
         XCTAssertEqual(newStore.reviewLogs.count, 1)
     }
     

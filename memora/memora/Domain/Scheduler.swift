@@ -32,9 +32,4 @@ class Scheduler {
         // Use DateUtility for proper JST handling
         return DateUtility.addDays(to: baseDate, days: dayOffset)
     }
-    
-    static func startOfDay(for date: Date, in timeZone: TimeZone = TimeZone(identifier: "Asia/Tokyo")!) -> Date {
-        // Delegate to DateUtility for consistent JST handling
-        return DateUtility.startOfDay(for: date)
-    }
 }

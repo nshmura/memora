@@ -63,21 +63,21 @@
     - 基本的なレイアウトとスタイリング
     - _Requirements: 2.1, 6.1, 6.2_
 
-- [ ] 6. StudyView画面の実装
+- [x] 6. StudyView画面の実装
   - [x] 6.1 StudyViewModelの作成
     - 今日復習すべきカード取得ロジック
     - 正誤判定とScheduler連携ロジック
     - 学習進捗管理
     - _Requirements: 1.2, 1.3, 1.4_
 
-  - [ ] 6.2 StudyViewのUI実装
+  - [x] 6.2 StudyViewのUI実装
     - 問題表示→回答表示→正誤ボタンのフロー
     - 進捗表示とカード切り替えアニメーション
     - 学習完了時の通知権限要求
     - _Requirements: 2.2, 3.1_
 
 - [ ] 7. CardsView画面の実装
-  - [ ] 7.1 CardsViewModelの作成
+  - [x] 7.1 CardsViewModelの作成
     - カード一覧表示ロジック
     - カード追加・編集・削除ロジック
     - 検索・フィルタ機能
