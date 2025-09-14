@@ -173,4 +173,19 @@ class Store: ObservableObject {
         settings = newSettings
         saveSettings()
     }
+    
+    // MARK: - Test Methods
+    
+    func createTestData() {
+        // Create test card data to initialize directory
+        if cards.isEmpty {
+            let testCard = Card(
+                question: "テスト問題",
+                answer: "テスト回答"
+            )
+            cards.append(testCard)
+            saveCards()
+            print("Test data created and saved to: \(getDocumentsDirectory().path)")
+        }
+    }
 }

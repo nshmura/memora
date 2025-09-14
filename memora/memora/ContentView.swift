@@ -40,6 +40,8 @@ struct ContentView: View {
         .preferredColorScheme(store.settings.theme.colorScheme)
         .onAppear {
             checkAndShowNotificationPrompt()
+            // デバッグ用：ファイルアプリに表示するためのテストデータを作成
+            store.createTestData()
         }
         .sheet(isPresented: $showNotificationPrompt) {
             NotificationPermissionView { granted in
