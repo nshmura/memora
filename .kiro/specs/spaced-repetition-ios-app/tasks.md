@@ -6,7 +6,7 @@
   - Info.plistに通知権限設定追加
   - _Requirements: 7.3_
 
-- [ ] 2. 基本データモデルの実装
+- [x] 2. 基本データモデルの実装
   - [x] 2.1 Cardモデルの作成とテスト
     - Card構造体をCodable準拠で実装
     - CardのUnit Testを作成（初期化、JSON変換テスト）
@@ -28,7 +28,7 @@
     - DocumentsディレクトリへのJSONファイル読み書き機能
     - _Requirements: 4.1, 4.2_
 
-  - [ ] 3.2 Storeのエラーハンドリングとテスト
+  - [x] 3.2 Storeのエラーハンドリングとテスト
     - ファイル読み書きエラーの適切な処理
     - StoreのUnit Test作成（保存・読み込み・エラーケース）
     - _Requirements: 4.3_

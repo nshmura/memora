@@ -16,7 +16,7 @@ class Store: ObservableObject {
         loadData()
     }
     
-    private func getDocumentsDirectory() -> URL {
+    func getDocumentsDirectory() -> URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
     }
     
