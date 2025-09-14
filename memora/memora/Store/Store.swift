@@ -22,7 +22,7 @@ class Store: ObservableObject {
         // Use Documents directory which is accessible from Files app
         // This is available without any special capabilities
         let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        let memoraDirectory = documentsDirectory.appendingPathComponent("Memora")
+        let memoraDirectory = documentsDirectory.appendingPathComponent("memora").appendingPathComponent("data")
         
         // Create directory if it doesn't exist
         if !fileManager.fileExists(atPath: memoraDirectory.path) {
@@ -30,8 +30,8 @@ class Store: ObservableObject {
                 try fileManager.createDirectory(at: memoraDirectory, withIntermediateDirectories: true)
                 print("Created documents directory: \(memoraDirectory.path)")
                 
-                // Try to migrate data from old Application Support location
-                migrateFromApplicationSupport()
+                // Try to migrate data from old locations
+                migrateFromOldLocations()
                 
             } catch {
                 print("Failed to create directory: \(error)")
@@ -118,53 +118,65 @@ class Store: ObservableObject {
     
     // MARK: - Data Migration
     
-    private func migrateFromApplicationSupport() {
+    private func migrateFromOldLocations() {
         let fileManager = FileManager.default
-        
-        // Get old Application Support directory
-        guard let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
-            return
-        }
-        
-        let oldMemoraDirectory = appSupportURL.appendingPathComponent("Memora")
-        
-        // Check if old directory exists
-        guard fileManager.fileExists(atPath: oldMemoraDirectory.path) else {
-            print("No old data to migrate")
-            return
-        }
-        
         let newMemoraDirectory = getDocumentsDirectory()
         let filesToMigrate = ["cards.json", "settings.json", "reviewLogs.json"]
         
-        print("Starting data migration from Application Support to Documents...")
+        // Migration locations to check (in order of preference)
+        let migrationSources: [(path: URL, description: String)] = [
+            // 1. Documents/Memora/ (previous location)
+            (fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("Memora"), "Documents/Memora"),
+            // 2. Application Support/Memora/ (original location)
+            (fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Memora"), "Application Support/Memora")
+        ]
         
-        for filename in filesToMigrate {
-            let oldFileURL = oldMemoraDirectory.appendingPathComponent(filename)
-            let newFileURL = newMemoraDirectory.appendingPathComponent(filename)
-            
-            // Skip if old file doesn't exist
-            guard fileManager.fileExists(atPath: oldFileURL.path) else {
+        var migratedFrom: String?
+        
+        for (sourcePath, description) in migrationSources {
+            // Check if source directory exists
+            guard fileManager.fileExists(atPath: sourcePath.path) else {
                 continue
             }
             
-            // Skip if new file already exists (don't overwrite)
-            guard !fileManager.fileExists(atPath: newFileURL.path) else {
-                print("Skipping \(filename) - already exists in new location")
-                continue
+            print("Checking for data to migrate from: \(description)")
+            
+            var hasDataToMigrate = false
+            for filename in filesToMigrate {
+                let oldFileURL = sourcePath.appendingPathComponent(filename)
+                let newFileURL = newMemoraDirectory.appendingPathComponent(filename)
+                
+                // Skip if old file doesn't exist
+                guard fileManager.fileExists(atPath: oldFileURL.path) else {
+                    continue
+                }
+                
+                // Skip if new file already exists (don't overwrite)
+                guard !fileManager.fileExists(atPath: newFileURL.path) else {
+                    print("Skipping \(filename) - already exists in new location")
+                    continue
+                }
+                
+                do {
+                    try fileManager.copyItem(at: oldFileURL, to: newFileURL)
+                    print("Migrated \(filename) from \(description)")
+                    hasDataToMigrate = true
+                } catch {
+                    print("Failed to migrate \(filename) from \(description): \(error)")
+                }
             }
             
-            do {
-                try fileManager.copyItem(at: oldFileURL, to: newFileURL)
-                print("Migrated \(filename) to Documents directory")
-            } catch {
-                print("Failed to migrate \(filename): \(error)")
+            if hasDataToMigrate {
+                migratedFrom = description
+                break // Stop after first successful migration
             }
         }
         
-        // Optionally remove old directory after successful migration
-        // We'll keep it for safety - users can manually delete it later
-        print("Migration completed. Old data preserved in Application Support for safety.")
+        if let source = migratedFrom {
+            print("Migration completed from: \(source). Old data preserved for safety.")
+        } else {
+            print("No old data to migrate")
+        }
     }
 
     // MARK: - Update Methods

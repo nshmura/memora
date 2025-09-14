@@ -167,13 +167,13 @@ A: apple
 ### ファイルアプリからのアクセス
 Memoraアプリのデータは「ファイル」アプリからアクセス・管理できます：
 
-**保存場所**: `このiPhone内/memora/Memora/`
+**保存場所**: `このiPhone内/memora/data/`
 - `cards.json` - 学習カードデータ
 - `settings.json` - アプリ設定
 - `reviewLogs.json` - 学習ログ
 
 ### データのバックアップ・共有
-1. ファイルアプリで「Memora」フォルダを開く
+1. ファイルアプリで「memora/data」フォルダを開く
 2. JSONファイルを選択して「共有」
 3. メール、AirDrop、クラウドストレージに保存
 
