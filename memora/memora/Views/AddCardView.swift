@@ -19,8 +19,7 @@ struct AddCardView: View {
     @State private var alertMessage = ""
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
+        ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     // Question Input
                     VStack(alignment: .leading, spacing: 8) {
@@ -151,7 +150,6 @@ struct AddCardView: View {
             } message: {
                 Text(alertMessage)
             }
-        }
     }
     
     private var isFormValid: Bool {

@@ -46,11 +46,15 @@ struct CardsView: View {
             }
         }
         .sheet(isPresented: $showingAddCard) {
-            AddCardView(viewModel: viewModel)
+            NavigationStack {
+                AddCardView(viewModel: viewModel)
+            }
         }
         .sheet(isPresented: $showingEditCard) {
             if let card = editingCard {
-                EditCardView(card: card, viewModel: viewModel)
+                NavigationStack {
+                    EditCardView(card: card, viewModel: viewModel)
+                }
             }
         }
         .onAppear {

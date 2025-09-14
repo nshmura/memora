@@ -21,59 +21,57 @@ struct EditCardView: View {
     @State private var showingDeleteConfirmation = false
     
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    CardInfoView(card: card)
-                    
-                    QuestionInputView(question: $question)
-                    
-                    AnswerInputView(answer: $answer)
-                    
-                    TagInputView(
-                        tagInput: $tagInput,
-                        selectedTags: $selectedTags,
-                        availableTags: viewModel.availableTags,
-                        onAddTag: {
-                            addTag()
-                        }
-                    )
-                }
-                .padding()
-            }
-            .navigationTitle("カードを編集")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("キャンセル") {
-                        dismiss()
-                    }
-                }
+        ScrollView {
+            VStack(spacing: 20) {
+                CardInfoView(card: card)
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("保存") {
-                        saveCard()
+                QuestionInputView(question: $question)
+                
+                AnswerInputView(answer: $answer)
+                
+                TagInputView(
+                    tagInput: $tagInput,
+                    selectedTags: $selectedTags,
+                    availableTags: viewModel.availableTags,
+                    onAddTag: {
+                        addTag()
                     }
-                    .disabled(!isFormValid)
-                    .fontWeight(.semibold)
+                )
+            }
+            .padding()
+        }
+        .navigationTitle("カードを編集")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button("キャンセル") {
+                    dismiss()
                 }
             }
-            .alert("エラー", isPresented: $showingAlert) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(alertMessage)
-            }
-            .confirmationDialog("カードを削除しますか？", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
-                Button("削除", role: .destructive) {
-                    deleteCard()
+            
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("保存") {
+                    saveCard()
                 }
-                Button("キャンセル", role: .cancel) { }
-            } message: {
-                Text("この操作は取り消せません。")
+                .disabled(!isFormValid)
+                .fontWeight(.semibold)
             }
-            .onAppear {
-                loadCardData()
+        }
+        .alert("エラー", isPresented: $showingAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(alertMessage)
+        }
+        .confirmationDialog("カードを削除しますか？", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+            Button("削除", role: .destructive) {
+                deleteCard()
             }
+            Button("キャンセル", role: .cancel) { }
+        } message: {
+            Text("この操作は取り消せません。")
+        }
+        .onAppear {
+            loadCardData()
         }
     }
     
