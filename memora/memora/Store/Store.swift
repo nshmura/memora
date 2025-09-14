@@ -19,26 +19,28 @@ class Store: ObservableObject {
     func getDocumentsDirectory() -> URL {
         let fileManager = FileManager.default
         
-        // Use Application Support directory for organized data storage
-        // NOTE: On iOS, ALL app data is deleted when the app is uninstalled
-        // There is no way to persist data beyond app deletion without cloud storage
-        let urls = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)
-        let appSupportDirectory = urls[0]
-        
-        // Create app-specific directory
-        let memoraDirectory = appSupportDirectory.appendingPathComponent("Memora")
+        // Use Documents directory which is accessible from Files app
+        // This is available without any special capabilities
+        let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let memoraDirectory = documentsDirectory.appendingPathComponent("Memora")
         
         // Create directory if it doesn't exist
         if !fileManager.fileExists(atPath: memoraDirectory.path) {
             do {
                 try fileManager.createDirectory(at: memoraDirectory, withIntermediateDirectories: true)
+                print("Created documents directory: \(memoraDirectory.path)")
+                
+                // Try to migrate data from old Application Support location
+                migrateFromApplicationSupport()
+                
             } catch {
                 print("Failed to create directory: \(error)")
-                // Fallback to documents directory
-                return fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                // Fallback to root documents directory
+                return documentsDirectory
             }
         }
         
+        print("Using Documents directory: \(memoraDirectory.path)")
         return memoraDirectory
     }
     
@@ -114,6 +116,57 @@ class Store: ObservableObject {
         }
     }
     
+    // MARK: - Data Migration
+    
+    private func migrateFromApplicationSupport() {
+        let fileManager = FileManager.default
+        
+        // Get old Application Support directory
+        guard let appSupportURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first else {
+            return
+        }
+        
+        let oldMemoraDirectory = appSupportURL.appendingPathComponent("Memora")
+        
+        // Check if old directory exists
+        guard fileManager.fileExists(atPath: oldMemoraDirectory.path) else {
+            print("No old data to migrate")
+            return
+        }
+        
+        let newMemoraDirectory = getDocumentsDirectory()
+        let filesToMigrate = ["cards.json", "settings.json", "reviewLogs.json"]
+        
+        print("Starting data migration from Application Support to Documents...")
+        
+        for filename in filesToMigrate {
+            let oldFileURL = oldMemoraDirectory.appendingPathComponent(filename)
+            let newFileURL = newMemoraDirectory.appendingPathComponent(filename)
+            
+            // Skip if old file doesn't exist
+            guard fileManager.fileExists(atPath: oldFileURL.path) else {
+                continue
+            }
+            
+            // Skip if new file already exists (don't overwrite)
+            guard !fileManager.fileExists(atPath: newFileURL.path) else {
+                print("Skipping \(filename) - already exists in new location")
+                continue
+            }
+            
+            do {
+                try fileManager.copyItem(at: oldFileURL, to: newFileURL)
+                print("Migrated \(filename) to Documents directory")
+            } catch {
+                print("Failed to migrate \(filename): \(error)")
+            }
+        }
+        
+        // Optionally remove old directory after successful migration
+        // We'll keep it for safety - users can manually delete it later
+        print("Migration completed. Old data preserved in Application Support for safety.")
+    }
+
     // MARK: - Update Methods
     
     func updateSettings(_ newSettings: Settings) {
