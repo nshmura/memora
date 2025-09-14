@@ -23,7 +23,7 @@
     - _Requirements: 4.2_
 
 - [ ] 3. JSONストレージシステムの実装
-  - [ ] 3.1 基本Storeクラスの作成
+  - [x] 3.1 基本Storeクラスの作成
     - ObservableObjectとしてStoreクラス実装
     - DocumentsディレクトリへのJSONファイル読み書き機能
     - _Requirements: 4.1, 4.2_
