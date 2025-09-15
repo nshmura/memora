@@ -49,12 +49,14 @@ xcodebuild clean build -target memora
   </tr>
   <tr>
     <td align="center"><strong>Cards</strong><br/>
-      <img src="docs/images/card.png" alt="カード一覧/追加" width="200">
+      <img src="docs/images/card1.png" alt="カード一覧" width="200">
+    </td>
+    <td align="center"><strong>Settings</strong><br/>
+      <img src="docs/images/card2.png" alt="カード追加" width="200">
     </td>
     <td align="center"><strong>Settings</strong><br/>
       <img src="docs/images/settings.png" alt="設定画面" width="200">
     </td>
-    <td align="center">&nbsp;</td>
   </tr>
 </table>
 
